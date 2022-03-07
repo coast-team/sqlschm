@@ -1,0 +1,30 @@
+Schema(
+    tables=(
+        Table(
+            name=("team",),
+            columns=[
+                Column(
+                    name="name",
+                    type=Type(name="TEXT", params=()),
+                    not_null=True,
+                    autoincrement=False,
+                    generated=False,
+                    default=None,
+                    collation=None,
+                )
+            ],
+            constraints=[
+                Uniqueness(
+                    name=None,
+                    columns=("name",),
+                    is_primary=True,
+                    on_conflict=OnConflict.IGNORE,
+                )
+            ],
+            options=TableOptions(strict=False, without_rowid=False),
+            if_not_exists=False,
+            or_replace=False,
+            temporary=False,
+        ),
+    )
+)

@@ -1,0 +1,3 @@
+CREATE TEMPORARY TABLE person(
+    fullname text
+) STRICT, WITHOUT ROWID;

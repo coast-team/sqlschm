@@ -1,0 +1,5 @@
+CREATE TABLE person(
+    fullname text NOT NULL PRIMARY KEY,
+    age int DEFAULT 0,
+    CHECK (age >= 0)
+);

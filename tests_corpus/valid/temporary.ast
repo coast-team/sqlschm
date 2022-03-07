@@ -1,0 +1,23 @@
+Schema(
+    tables=(
+        Table(
+            name=("person",),
+            columns=[
+                Column(
+                    name="fullname",
+                    type=Type(name="TEXT", params=()),
+                    not_null=False,
+                    autoincrement=False,
+                    generated=False,
+                    default=None,
+                    collation=None,
+                )
+            ],
+            constraints=[],
+            options=TableOptions(strict=True, without_rowid=True),
+            if_not_exists=False,
+            or_replace=False,
+            temporary=True,
+        ),
+    )
+)

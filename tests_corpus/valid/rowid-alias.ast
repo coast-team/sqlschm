@@ -1,0 +1,30 @@
+Schema(
+    tables=(
+        Table(
+            name=("person",),
+            columns=[
+                Column(
+                    name="id",
+                    type=Type(name="INTEGER", params=()),
+                    not_null=True,
+                    autoincrement=False,
+                    generated=False,
+                    default=None,
+                    collation=None,
+                )
+            ],
+            constraints=[
+                Uniqueness(
+                    name=None,
+                    columns=("id",),
+                    is_primary=True,
+                    on_conflict=OnConflict.ABORT,
+                )
+            ],
+            options=TableOptions(strict=False, without_rowid=False),
+            if_not_exists=False,
+            or_replace=False,
+            temporary=False,
+        ),
+    )
+)

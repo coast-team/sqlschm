@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "sqlschm"
+version = "0.0.0"
+description = "A SQLite Schema parser"
+authors = ["Victorien Elvinger <victorien.elvinger@inria.fr>"]
+license = "Apache-2.0"
+repository = "https://github.com/coast-team/sqlschm"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+[tool.poetry.dev-dependencies]
+black = "^22.1.0"
+pyright = "^1.1.227"
+pytest = "^7.0.1"
+
+[tool.poetry.scripts]
+corpus = "scripts:main"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

@@ -1,0 +1,66 @@
+Schema(
+    tables=(
+        Table(
+            name=("t1",),
+            columns=[
+                Column(
+                    name="a",
+                    type=Type(name="INTEGER", params=()),
+                    not_null=False,
+                    autoincrement=False,
+                    generated=False,
+                    default=None,
+                    collation=None,
+                ),
+                Column(
+                    name="b",
+                    type=Type(name="INT", params=()),
+                    not_null=False,
+                    autoincrement=False,
+                    generated=False,
+                    default=None,
+                    collation=None,
+                ),
+                Column(
+                    name="c",
+                    type=Type(name="TEXT", params=()),
+                    not_null=False,
+                    autoincrement=False,
+                    generated=False,
+                    default=None,
+                    collation=None,
+                ),
+                Column(
+                    name="d",
+                    type=Type(name="INT", params=()),
+                    not_null=False,
+                    autoincrement=False,
+                    generated=True,
+                    default=None,
+                    collation=None,
+                ),
+                Column(
+                    name="e",
+                    type=Type(name="TEXT", params=()),
+                    not_null=False,
+                    autoincrement=False,
+                    generated=True,
+                    default=None,
+                    collation=None,
+                ),
+            ],
+            constraints=[
+                Uniqueness(
+                    name=None,
+                    columns=("a",),
+                    is_primary=True,
+                    on_conflict=OnConflict.ABORT,
+                )
+            ],
+            options=TableOptions(strict=False, without_rowid=False),
+            if_not_exists=False,
+            or_replace=False,
+            temporary=False,
+        ),
+    )
+)
