@@ -28,7 +28,7 @@ This project adheres to [Semantic Versioning][semver].
     from sqlschm import generate_schema, Dialect
 
     # schema is obtained from a parsing step
-    out = generate_schema(schema, Dialect;SQLITE)
+    out = generate_schema(schema, Dialect.SQLITE)
     ```
 
 [semver]: https://semver.org/spec/v2.0.0.html
