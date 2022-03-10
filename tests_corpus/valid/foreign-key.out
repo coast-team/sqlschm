@@ -1,0 +1,7 @@
+
+CREATE TABLE person(
+    fullname text NOT NULL,
+    friend,
+    PRIMARY KEY (fullname),
+    FOREIGN KEY (friend) REFERENCES person(fullname)
+);

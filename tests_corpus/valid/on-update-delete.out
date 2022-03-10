@@ -1,0 +1,7 @@
+
+CREATE TABLE team(
+    name text NOT NULL,
+    captain,
+    PRIMARY KEY (name),
+    FOREIGN KEY (captain) REFERENCES person(fullname) ON UPDATE CASCADE ON DELETE SET NULL
+);

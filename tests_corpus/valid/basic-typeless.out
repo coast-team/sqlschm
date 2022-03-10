@@ -1,0 +1,6 @@
+
+CREATE TABLE person(
+    fullname NOT NULL,
+    birthday,
+    PRIMARY KEY (fullname)
+);

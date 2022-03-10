@@ -1,0 +1,11 @@
+
+CREATE TABLE contacts(
+    contact_id integer,
+    first_name text NOT NULL,
+    last_name text NOT NULL,
+    email text NOT NULL,
+    phone text NOT NULL,
+    PRIMARY KEY (contact_id),
+    UNIQUE (email) ON CONFLICT IGNORE,
+    UNIQUE (phone)
+);

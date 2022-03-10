@@ -1,4 +1,4 @@
-from sqlschm.parser import parse_schema
+from sqlschm import parse_schema
 import black
 from black import mode
 import os

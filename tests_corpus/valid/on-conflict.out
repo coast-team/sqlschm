@@ -1,0 +1,5 @@
+
+CREATE TABLE team(
+    name text NOT NULL,
+    PRIMARY KEY (name) ON CONFLICT IGNORE
+);

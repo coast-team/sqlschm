@@ -20,5 +20,15 @@ This project adheres to [Semantic Versioning][semver].
     schema = parse_schema(statement)
     ```
 
+-   Basic support for generating CREATE TABLE from a schema
+
+    Only SQLite dialect is available.
+
+    ```py
+    from sqlschm import generate_schema, Dialect
+
+    # schema is obtained from a parsing step
+    out = generate_schema(schema, Dialect;SQLITE)
+    ```
 
 [semver]: https://semver.org/spec/v2.0.0.html
