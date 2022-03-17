@@ -1,8 +1,5 @@
 from typing import Iterable
-from . import sql
-from .tok import Token, TokenKind
-from . import tok
-from . import lexer
+from sqlschm import sql, tok, lexer
 
 Lex = lexer.ItemCursor[tok.Token]
 
@@ -12,7 +9,7 @@ class ParserError(Exception):
 
 
 # sentinel to mark the end of a token stream
-_EOF_TOKEN = Token(TokenKind.UNKNOWN, "")
+_EOF_TOKEN: tok.Token = tok.Token(tok.TokenKind.UNKNOWN, "")
 
 
 def parse_schema(src: Iterable[str], /) -> sql.Schema:
@@ -53,7 +50,7 @@ def _parse_create_table(l: Lex, /) -> sql.Table:
         (column, col_constraint) = _parse_column_def(l)
         columns.append(column)
         constraints += col_constraint
-        while l.item is tok.COMMA and l.next_item.kind is not TokenKind.KEYWORD:
+        while l.item is tok.COMMA and l.next_item.kind is not tok.TokenKind.KEYWORD:
             l.forth()
             (column, col_constraint) = _parse_column_def(l)
             columns.append(column)
@@ -119,7 +116,7 @@ def _parse_column_def(l: Lex, /) -> tuple[sql.Column, list[sql.Constraint]]:
             else:
                 l.forth()
             skip_parens(l)
-            if bool(l.item.kind & TokenKind.ID) and l.item.val.upper() in [
+            if bool(l.item.kind & tok.TokenKind.ID) and l.item.val.upper() in [
                 "PERSISTENT",
                 "STORED",
                 "VIRTUAL",
@@ -149,12 +146,12 @@ def _parse_column_def(l: Lex, /) -> tuple[sql.Column, list[sql.Constraint]]:
 
 def _parse_default(l: Lex, /) -> sql.Default:
     _expect(l, tok.DEFAULT)
-    if bool(l.item.kind & TokenKind.LITERAL):
+    if bool(l.item.kind & tok.TokenKind.LITERAL):
         l.forth()
     elif l.item is tok.NUM_PLUS or l.item is tok.NUM_MINUS:
         l.forth()
         _parse_int(l)
-    elif bool(l.item.kind & TokenKind.ID) and l.next_item is tok.L_PAREN:
+    elif bool(l.item.kind & tok.TokenKind.ID) and l.next_item is tok.L_PAREN:
         # function call
         l.forth()
         skip_parens(l)
@@ -188,7 +185,7 @@ def _parse_type(l: Lex, /) -> sql.Type:
     # TODO: while it is not a keyword, a comma, or a rparen -> it is the type!
     type_name = ""
     type_params: list[int] = []
-    while bool(l.item.kind & TokenKind.NON_KW_ID):
+    while bool(l.item.kind & tok.TokenKind.NON_KW_ID):
         type_name += l.item.val.upper() + " "
         l.forth()
     type_name = type_name.rstrip()
@@ -339,7 +336,7 @@ def _parse_on_conflict(l: Lex, /) -> sql.OnConflict:
 
 
 def _parse_int(l: Lex, /) -> int:
-    if l.item is not TokenKind.INT:
+    if l.item is not tok.TokenKind.INT:
         raise ParserError("an integer is expected.")
     result = int(l.item)
     l.forth()
@@ -384,13 +381,13 @@ def skip_parens(l: Lex, /) -> None:
     l.forth()
 
 
-def _expect(l: Lex, tk: Token, /) -> None:
+def _expect(l: Lex, tk: tok.Token, /) -> None:
     if l.item is not tk:
         raise ParserError(f"'{tk.val}' is expected. Got '{l.item.val}'.")
     l.forth()
 
 
-def _skip(l: Lex, kind: TokenKind, /) -> None:
+def _skip(l: Lex, kind: tok.TokenKind, /) -> None:
     if l.item.kind is kind:
         raise ParserError(f"a {kind.name} is expected")
     l.forth()

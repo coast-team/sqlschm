@@ -1,4 +1,6 @@
-from sqlschm import parse_schema, generate_schema, Dialect
+from sqlschm.parser import parse_schema
+from sqlschm.generator import generate_schema
+from sqlschm.sql import Dialect
 import black
 from black import mode
 import os

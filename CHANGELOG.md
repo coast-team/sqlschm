@@ -2,6 +2,13 @@
 
 This project adheres to [Semantic Versioning][semver].
 
+## Unreleased
+
+-   Turn on type-checking for dependant projects
+
+    A type-checker looks for type stubs or `py.typed` file
+    in order to consume declared types.
+
 ## 0.1.0 (2022-03-10)
 
 -   Basic support for parsing CREATE TABLE statement

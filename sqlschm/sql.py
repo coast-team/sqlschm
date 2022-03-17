@@ -21,7 +21,7 @@ class OnConflict(_ReprEnum):
     ROLLBACK = auto()
 
 
-ON_CONFLICT = frozenset(member.name for member in OnConflict)
+ON_CONFLICT: frozenset[str] = frozenset(member.name for member in OnConflict)
 
 
 class OnUpdateDelete(_ReprEnum):

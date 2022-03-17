@@ -5,6 +5,10 @@ description = "A SQLite Schema parser"
 authors = ["Victorien Elvinger <victorien.elvinger@inria.fr>"]
 license = "Apache-2.0"
 repository = "https://github.com/coast-team/sqlschm"
+packages = [
+    {include = "sqlschm"},
+    {include = "sqlschm/py.typed"},
+]
 
 [tool.poetry.dependencies]
 python = "^3.10"
@@ -20,3 +24,6 @@ corpus = "scripts:main"
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pyright]
+reportMissingTypeStubs=true

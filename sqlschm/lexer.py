@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from typing import Iterator, Iterable, Generic, TypeVar
-from .tok import Token, TokenKind
-from . import tok
+from sqlschm import tok
 
 T = TypeVar("T")
 
@@ -21,12 +20,12 @@ class ItemCursor(Generic[T]):
         self.forth()
         self.forth()
 
-    def forth(self):
+    def forth(self) -> None:
         self.item = self.next_item
         self.next_item = next(self._it, self._default_item)
 
 
-def tokens(src: Iterable[str], /) -> Iterable[Token]:
+def tokens(src: Iterable[str], /) -> Iterable[tok.Token]:
     cs = ItemCursor(src, None)
     while cs.item is not None:
         assert len(cs.item) == 1
@@ -47,7 +46,7 @@ def tokens(src: Iterable[str], /) -> Iterable[Token]:
             elif id_upper in tok.INTERNED:
                 yield tok.INTERNED[id_upper]
             else:
-                yield Token(TokenKind.RAW_ID, id)
+                yield tok.Token(tok.TokenKind.RAW_ID, id)
         elif cs.item in "'\"":
             yield _str_token(cs)
         elif cs.item in "`[":
@@ -66,11 +65,11 @@ def tokens(src: Iterable[str], /) -> Iterable[Token]:
                     yield tok.INTERNED[cs.item]
                 cs.forth()
         else:
-            yield Token(TokenKind.UNKNOWN, cs.item)
+            yield tok.Token(tok.TokenKind.UNKNOWN, cs.item)
             cs.forth()
 
 
-def _single_line_comment_token(cs: ItemCursor[str | None], /) -> Token:
+def _single_line_comment_token(cs: ItemCursor[str | None], /) -> tok.Token:
     cs.forth()  # consume -
     cs.forth()  # consume -
     content = ""
@@ -78,10 +77,10 @@ def _single_line_comment_token(cs: ItemCursor[str | None], /) -> Token:
         content += cs.item
         cs.forth()
     cs.forth()  # consume  \n or None
-    return Token(TokenKind.SINGLE_LINE_COMMENT, content)
+    return tok.Token(tok.TokenKind.SINGLE_LINE_COMMENT, content)
 
 
-def _multi_line_comment_token(cs: ItemCursor[str | None], /) -> Token:
+def _multi_line_comment_token(cs: ItemCursor[str | None], /) -> tok.Token:
     cs.forth()  # consume /
     cs.forth()  # consume *
     content = ""
@@ -96,53 +95,53 @@ def _multi_line_comment_token(cs: ItemCursor[str | None], /) -> Token:
         if cs.item is not None:
             content += cs.item
             cs.forth()
-        return Token(TokenKind.UNKNOWN, f"/*{content}")
+        return tok.Token(tok.TokenKind.UNKNOWN, f"/*{content}")
     cs.forth()  # consume *
     cs.forth()  # consume /
-    return Token(TokenKind.MULTI_LINE_COMMENT, content)
+    return tok.Token(tok.TokenKind.MULTI_LINE_COMMENT, content)
 
 
-def _blob_token(cs: ItemCursor[str | None], /) -> Token:
+def _blob_token(cs: ItemCursor[str | None], /) -> tok.Token:
     assert cs.item in ["'", '"']
     delim = cs.item
     cs.forth()  # consume ' or "
     n = _hex_literal(cs)
     if cs.item != delim:
-        return Token(TokenKind.UNKNOWN, f"{delim}{n}")
+        return tok.Token(tok.TokenKind.UNKNOWN, f"{delim}{n}")
     cs.forth()  # consume ' or "
-    return Token(TokenKind.BLOB, n)
+    return tok.Token(tok.TokenKind.BLOB, n)
 
 
-def _bin_token(cs: ItemCursor[str | None], /) -> Token:
+def _bin_token(cs: ItemCursor[str | None], /) -> tok.Token:
     assert cs.item in ["'", '"']
     delim = cs.item
     cs.forth()  # consume ' or "
     n = _bin_literal(cs)
     if cs.item != delim:
-        return Token(TokenKind.UNKNOWN, f"{delim}{n}")
+        return tok.Token(tok.TokenKind.UNKNOWN, f"{delim}{n}")
     cs.forth()  # consume ' or "
-    return Token(TokenKind.BINARY, n)
+    return tok.Token(tok.TokenKind.BINARY, n)
 
 
-def _numeric_token(cs: ItemCursor[str | None], /) -> Token:
+def _numeric_token(cs: ItemCursor[str | None], /) -> tok.Token:
     first_part = _fractional_literal(cs)
     if "e" in first_part:
-        return Token(TokenKind.FLOAT, first_part)
+        return tok.Token(tok.TokenKind.FLOAT, first_part)
     if cs.item == ".":
         cs.forth()
         val = first_part + "." + _fractional_literal(cs)
-        return Token(TokenKind.FLOAT, val)
+        return tok.Token(tok.TokenKind.FLOAT, val)
     elif first_part == "0" and cs.item in ["x", "X"]:
         x = cs.item
         cs.forth()
         if cs.item in _HEX_DIGITS:
-            return Token(TokenKind.HEX, _hex_literal(cs))
+            return tok.Token(tok.TokenKind.HEX, _hex_literal(cs))
         else:
-            return Token(TokenKind.UNKNOWN, f"0{x}")
-    return Token(TokenKind.INT, first_part)
+            return tok.Token(tok.TokenKind.UNKNOWN, f"0{x}")
+    return tok.Token(tok.TokenKind.INT, first_part)
 
 
-def _str_token(cs: ItemCursor[str | None], /) -> Token:
+def _str_token(cs: ItemCursor[str | None], /) -> tok.Token:
     assert cs.item is not None
     delim = cs.item  # " or '
     cs.forth()  # consume delim
@@ -155,20 +154,20 @@ def _str_token(cs: ItemCursor[str | None], /) -> Token:
         s += cs.item
         cs.forth()
     if cs.item is None:
-        return Token(TokenKind.UNKNOWN, f"{delim}{s}")
+        return tok.Token(tok.TokenKind.UNKNOWN, f"{delim}{s}")
     cs.forth()  # consume delim
-    kind = TokenKind.STD_STR if delim == "'" else TokenKind.STD_DELIMITED_ID
-    return Token(kind, s)
+    kind = tok.TokenKind.STD_STR if delim == "'" else tok.TokenKind.STD_DELIMITED_ID
+    return tok.Token(kind, s)
 
 
-def _enclosed_id_token(cs: ItemCursor[str | None], /) -> Token:
+def _enclosed_id_token(cs: ItemCursor[str | None], /) -> tok.Token:
     delim = cs.item
     cs.forth()
     s = _identifier(cs)
     if cs.item != delim:
         pass
     cs.forth()
-    return Token(TokenKind.NON_STD_DELIMITED_ID, s)
+    return tok.Token(tok.TokenKind.NON_STD_DELIMITED_ID, s)
 
 
 def _identifier(cs: ItemCursor[str | None], /) -> str:
@@ -216,4 +215,4 @@ def _int_literal(cs: ItemCursor[str | None], /) -> str:
     return result
 
 
-_HEX_DIGITS = frozenset(iter("0123456789ABCDEFabcdef"))
+_HEX_DIGITS: frozenset[str] = frozenset(iter("0123456789ABCDEFabcdef"))

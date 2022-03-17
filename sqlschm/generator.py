@@ -1,5 +1,5 @@
-from . import sql
 import textwrap
+from sqlschm import sql
 
 
 def generate_schema(schema: sql.Schema, dialect: sql.Dialect, /) -> str:
