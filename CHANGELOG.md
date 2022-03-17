@@ -2,7 +2,7 @@
 
 This project adheres to [Semantic Versioning][semver].
 
-## Unreleased
+## 0.2.0 (2022-03-17)
 
 -   Turn on type-checking for dependant projects
 
