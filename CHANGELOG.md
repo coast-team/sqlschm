@@ -20,6 +20,13 @@ This project adheres to [Semantic Versioning][semver].
 
     Previously sqlschm forgot to separate table options with a comma.
 
+-   Fix identifier generation
+
+    Previously the generator did not handle keywords as identifiers and
+    special strings as identifiers.
+    Now it quote every identifier and so handle keyword and special strings
+    as identifiers.
+
 ## 0.2.0 (2022-03-17)
 
 -   Turn on type-checking for dependant projects

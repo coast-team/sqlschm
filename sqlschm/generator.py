@@ -38,22 +38,23 @@ def _generate_column_def(col: sql.Column, /) -> str:
     not_null = " NOT NULL" if col.not_null else ""
     autoincr = " AUTOINCREMENT" if col.autoincrement else ""
     collation = f" COLLATE {col.collation}" if col.collation is not None else ""
-    return f"{col.name}{coltype}{not_null}{autoincr}{collation}"
+    return f'"{col.name}"{coltype}{not_null}{autoincr}{collation}'
 
 
 def _generate_constraint(constraint: sql.Constraint, /) -> str:
+    name = f'CONSTRAINT "{constraint.name}" ' if constraint.name is not None else ""
+    cols = ", ".join(f'"{col}"' for col in constraint.columns)
     if isinstance(constraint, sql.Uniqueness):
-        name = f"CONSTRAINT {constraint.name} " if constraint.name is not None else ""
         on_conflict = _generate_on_conflict(constraint.on_conflict)
         if constraint.is_primary:
-            return f"{name}PRIMARY KEY ({', '.join(constraint.columns)}){on_conflict}"
+            return f"{name}PRIMARY KEY ({cols}){on_conflict}"
         else:
-            return f"{name}UNIQUE ({', '.join(constraint.columns)}){on_conflict}"
+            return f"{name}UNIQUE ({cols}){on_conflict}"
     else:
         assert isinstance(constraint, sql.ForeignKey)
         foreign_table = _generate_qualified_name(constraint.foreign_table)
         referred_columns = (
-            "(" + ", ".join(constraint.referred_columns) + ")"
+            "(" + ", ".join(f'"{col}"' for col in constraint.referred_columns) + ")"
             if constraint.referred_columns is not None
             else ""
         )
@@ -66,7 +67,7 @@ def _generate_constraint(constraint: sql.Constraint, /) -> str:
             " INITIALLY DEFERRED" if constraint.enforcement.initially_deferred else ""
         )
         return (
-            f"FOREIGN KEY ({', '.join(constraint.columns)}) "
+            f"{name}FOREIGN KEY ({cols}) "
             + f"REFERENCES {foreign_table}{referred_columns}"
             + f"{on_update}{on_delete}{not_deferrable}{initially_deferred}"
         )
@@ -103,4 +104,4 @@ def _generate_type(type: sql.Type | None, /) -> str:
 def _generate_qualified_name(qualified_name: sql.QualifiedName, /) -> str:
     names = list(qualified_name)
     names.reverse()
-    return ".".join(names)
+    return ".".join(f'"{name}"' for name in names)

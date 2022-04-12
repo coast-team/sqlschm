@@ -1,6 +1,6 @@
-CREATE TABLE person(
-    id integer,
-    name text,
-    age integer,
-    PRIMARY KEY (id)
+CREATE TABLE "person"(
+    "id" integer,
+    "name" text,
+    "age" integer,
+    PRIMARY KEY ("id")
 );

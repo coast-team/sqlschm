@@ -1,4 +1,4 @@
-CREATE TABLE person(
-    id integer NOT NULL,
-    PRIMARY KEY (id)
+CREATE TABLE "person"(
+    "id" integer NOT NULL,
+    PRIMARY KEY ("id")
 );

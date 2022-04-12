@@ -1,4 +1,4 @@
-CREATE TABLE table1(
-    a int NOT NULL,
-    b text
+CREATE TABLE "table1"(
+    "a" int NOT NULL,
+    "b" text
 );

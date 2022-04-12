@@ -1,5 +1,5 @@
-CREATE TABLE main.person(
-    fullname text NOT NULL,
-    birthday date,
-    PRIMARY KEY (fullname)
+CREATE TABLE "main"."person"(
+    "fullname" text NOT NULL,
+    "birthday" date,
+    PRIMARY KEY ("fullname")
 );

@@ -1,17 +1,17 @@
-CREATE TABLE contact_groups(
-    contact_id integer,
-    group_id integer,
-    PRIMARY KEY (contact_id, group_id),
-    FOREIGN KEY (contact_id) REFERENCES contacts(contact_id) ON DELETE CASCADE,
-    FOREIGN KEY (group_id) REFERENCES GROUPS(group_id) ON DELETE CASCADE
+CREATE TABLE "contact_groups"(
+    "contact_id" integer,
+    "group_id" integer,
+    PRIMARY KEY ("contact_id", "group_id"),
+    FOREIGN KEY ("contact_id") REFERENCES "contacts"("contact_id") ON DELETE CASCADE,
+    FOREIGN KEY ("group_id") REFERENCES "GROUPS"("group_id") ON DELETE CASCADE
 );
 
-CREATE TABLE contacts(
-    contact_id integer,
-    PRIMARY KEY (contact_id)
+CREATE TABLE "contacts"(
+    "contact_id" integer,
+    PRIMARY KEY ("contact_id")
 );
 
-CREATE TABLE GROUPS(
-    group_id integer,
-    PRIMARY KEY (group_id)
+CREATE TABLE "GROUPS"(
+    "group_id" integer,
+    PRIMARY KEY ("group_id")
 );

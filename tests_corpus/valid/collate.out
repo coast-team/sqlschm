@@ -1,3 +1,3 @@
-CREATE TABLE person(
-    fullname text COLLATE NOCASE
+CREATE TABLE "person"(
+    "fullname" text COLLATE NOCASE
 );

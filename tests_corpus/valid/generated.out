@@ -1,8 +1,8 @@
-CREATE TABLE t1(
-    a integer,
-    b int,
-    c text,
-    d int,
-    e text,
-    PRIMARY KEY (a)
+CREATE TABLE "t1"(
+    "a" integer,
+    "b" int,
+    "c" text,
+    "d" int,
+    "e" text,
+    PRIMARY KEY ("a")
 );

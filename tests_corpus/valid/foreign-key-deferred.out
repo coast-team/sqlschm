@@ -1,6 +1,6 @@
-CREATE TABLE person(
-    fullname text NOT NULL,
-    friend text,
-    PRIMARY KEY (fullname),
-    FOREIGN KEY (friend) REFERENCES person(fullname)
+CREATE TABLE "person"(
+    "fullname" text NOT NULL,
+    "friend" text,
+    PRIMARY KEY ("fullname"),
+    FOREIGN KEY ("friend") REFERENCES "person"("fullname")
 );

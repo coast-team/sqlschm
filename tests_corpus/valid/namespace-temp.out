@@ -1,5 +1,5 @@
-CREATE TABLE TEMP.person(
-    fullname text NOT NULL,
-    birthday date,
-    PRIMARY KEY (fullname)
+CREATE TABLE "TEMP"."person"(
+    "fullname" text NOT NULL,
+    "birthday" date,
+    PRIMARY KEY ("fullname")
 );
