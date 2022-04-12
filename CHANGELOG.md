@@ -4,6 +4,18 @@ This project adheres to [Semantic Versioning][semver].
 
 ## Unreleased
 
+-   Fix named constraints parsing
+
+    Previously sqlschm failed to parse named constraints.
+    Named constraints are now properly parsed. For instance:
+
+    ```sql
+    CREATE TABLE person(
+        fullname text,
+        CONSTRAINT a_name PRIMARY KEY (fullname)
+    );
+    ```
+
 -   Fix table options generation
 
     Previously sqlschm forgot to separate table options with a comma.

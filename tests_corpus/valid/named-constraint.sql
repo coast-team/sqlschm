@@ -1,0 +1,5 @@
+CREATE TABLE person(
+	fullname text NOT NULL,
+    birthday date,
+    CONSTRAINT pk PRIMARY KEY (fullname)
+);

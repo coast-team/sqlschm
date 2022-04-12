@@ -203,6 +203,7 @@ def _parse_constraint(l: Lex, col_name: str | None, /) -> sql.Constraint | None:
     columns = tuple() if col_name is None else tuple([col_name])
     name = None
     if l.item is tok.CONSTRAINT:
+        l.forth()
         name = _parse_name(l)  # skip name
     if l.item is tok.PRIMARY:
         l.forth()
