@@ -6,7 +6,7 @@ def generate_schema(schema: sql.Schema, dialect: sql.Dialect, /) -> str:
     result = ""
     for table in schema.tables:
         result += _generate_create_table(table)
-    return result
+    return result.strip()
 
 
 def _generate_create_table(table: sql.Table, /) -> str:
@@ -16,7 +16,7 @@ def _generate_create_table(table: sql.Table, /) -> str:
     or_replace = " OR REPLACE" if table.or_replace else ""
     option_list: list[str] = []
     if table.options.strict:
-        option_list += ["STRICT"]
+        option_list += [" STRICT"]
     if table.options.without_rowid:
         option_list += [" WITHOUT ROWID"]
     options = ",".join(option_list)
