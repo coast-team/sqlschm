@@ -2,7 +2,7 @@
 
 This project adheres to [Semantic Versioning][semver].
 
-## Unreleased
+## 0.2.1 (2022-04-12)
 
 -   Fix named constraints parsing
 
