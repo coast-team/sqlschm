@@ -14,8 +14,12 @@ def _generate_create_table(table: sql.Table, /) -> str:
     temp = " TEMPORARY" if table.temporary else ""
     if_not_exists = " IF NOT EXISTS" if table.if_not_exists else ""
     or_replace = " OR REPLACE" if table.or_replace else ""
-    strict = " STRICT" if table.options.strict else ""
-    without_rowid = " WITHOUT ROWID" if table.options.without_rowid else ""
+    option_list: list[str] = []
+    if table.options.strict:
+        option_list += ["STRICT"]
+    if table.options.without_rowid:
+        option_list += [" WITHOUT ROWID"]
+    options = ",".join(option_list)
     body_entries = list(map(_generate_column_def, table.columns)) + list(
         map(_generate_constraint, table.constraints)
     )
@@ -24,7 +28,7 @@ def _generate_create_table(table: sql.Table, /) -> str:
     return textwrap.dedent(
         f"""
         CREATE{or_replace}{temp} TABLE{if_not_exists} {table_name}({body}
-        ){strict}{without_rowid};
+        ){options};
         """
     )
 

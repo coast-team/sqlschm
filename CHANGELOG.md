@@ -2,6 +2,12 @@
 
 This project adheres to [Semantic Versioning][semver].
 
+## Unreleased
+
+-   Fix table options generation
+
+    Previously sqlschm forgot to separate table options with a comma.
+
 ## 0.2.0 (2022-03-17)
 
 -   Turn on type-checking for dependant projects
