@@ -1,11 +1,11 @@
 Schema(
-    tables=(
+    tables=[
         Table(
-            name=("person",),
+            name=["person"],
             columns=[
                 Column(
                     name="id",
-                    type=Type(name="INTEGER", params=()),
+                    type=Type(name="INTEGER", params=[]),
                     not_null=False,
                     autoincrement=False,
                     generated=False,
@@ -14,7 +14,7 @@ Schema(
                 ),
                 Column(
                     name="name",
-                    type=Type(name="TEXT", params=()),
+                    type=Type(name="TEXT", params=[]),
                     not_null=False,
                     autoincrement=False,
                     generated=False,
@@ -23,7 +23,7 @@ Schema(
                 ),
                 Column(
                     name="age",
-                    type=Type(name="INTEGER", params=()),
+                    type=Type(name="INTEGER", params=[]),
                     not_null=False,
                     autoincrement=False,
                     generated=False,
@@ -34,7 +34,7 @@ Schema(
             constraints=[
                 Uniqueness(
                     name=None,
-                    columns=("id",),
+                    columns=["id"],
                     is_primary=True,
                     on_conflict=OnConflict.ABORT,
                 )
@@ -43,6 +43,6 @@ Schema(
             if_not_exists=False,
             or_replace=False,
             temporary=False,
-        ),
-    )
+        )
+    ]
 )

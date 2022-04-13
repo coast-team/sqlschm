@@ -1,11 +1,11 @@
 Schema(
-    tables=(
+    tables=[
         Table(
-            name=("t1",),
+            name=["t1"],
             columns=[
                 Column(
                     name="a",
-                    type=Type(name="INTEGER", params=()),
+                    type=Type(name="INTEGER", params=[]),
                     not_null=False,
                     autoincrement=False,
                     generated=False,
@@ -14,7 +14,7 @@ Schema(
                 ),
                 Column(
                     name="b",
-                    type=Type(name="INT", params=()),
+                    type=Type(name="INT", params=[]),
                     not_null=False,
                     autoincrement=False,
                     generated=False,
@@ -23,7 +23,7 @@ Schema(
                 ),
                 Column(
                     name="c",
-                    type=Type(name="TEXT", params=()),
+                    type=Type(name="TEXT", params=[]),
                     not_null=False,
                     autoincrement=False,
                     generated=False,
@@ -32,7 +32,7 @@ Schema(
                 ),
                 Column(
                     name="d",
-                    type=Type(name="INT", params=()),
+                    type=Type(name="INT", params=[]),
                     not_null=False,
                     autoincrement=False,
                     generated=True,
@@ -41,7 +41,7 @@ Schema(
                 ),
                 Column(
                     name="e",
-                    type=Type(name="TEXT", params=()),
+                    type=Type(name="TEXT", params=[]),
                     not_null=False,
                     autoincrement=False,
                     generated=True,
@@ -52,7 +52,7 @@ Schema(
             constraints=[
                 Uniqueness(
                     name=None,
-                    columns=("a",),
+                    columns=["a"],
                     is_primary=True,
                     on_conflict=OnConflict.ABORT,
                 )
@@ -61,6 +61,6 @@ Schema(
             if_not_exists=False,
             or_replace=False,
             temporary=False,
-        ),
-    )
+        )
+    ]
 )

@@ -1,11 +1,11 @@
 Schema(
-    tables=(
+    tables=[
         Table(
-            name=("team",),
+            name=["team"],
             columns=[
                 Column(
                     name="name",
-                    type=Type(name="TEXT", params=()),
+                    type=Type(name="TEXT", params=[]),
                     not_null=True,
                     autoincrement=False,
                     generated=False,
@@ -14,7 +14,7 @@ Schema(
                 ),
                 Column(
                     name="captain",
-                    type=Type(name="", params=()),
+                    type=Type(name="", params=[]),
                     not_null=False,
                     autoincrement=False,
                     generated=False,
@@ -25,15 +25,15 @@ Schema(
             constraints=[
                 Uniqueness(
                     name=None,
-                    columns=("name",),
+                    columns=["name"],
                     is_primary=True,
                     on_conflict=OnConflict.ABORT,
                 ),
                 ForeignKey(
                     name=None,
-                    columns=("captain",),
-                    foreign_table=("person",),
-                    referred_columns=("fullname",),
+                    columns=["captain"],
+                    foreign_table=["person"],
+                    referred_columns=["fullname"],
                     on_delete=OnUpdateDelete.SET_NULL,
                     on_update=OnUpdateDelete.CASCADE,
                     enforcement=ConstraintEnforcement(
@@ -45,6 +45,6 @@ Schema(
             if_not_exists=False,
             or_replace=False,
             temporary=False,
-        ),
-    )
+        )
+    ]
 )

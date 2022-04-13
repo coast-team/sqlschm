@@ -1,11 +1,11 @@
 Schema(
-    tables=(
+    tables=[
         Table(
-            name=("table1",),
+            name=["table1"],
             columns=[
                 Column(
                     name="a",
-                    type=Type(name="INT", params=()),
+                    type=Type(name="INT", params=[]),
                     not_null=True,
                     autoincrement=False,
                     generated=False,
@@ -14,7 +14,7 @@ Schema(
                 ),
                 Column(
                     name="b",
-                    type=Type(name="TEXT", params=()),
+                    type=Type(name="TEXT", params=[]),
                     not_null=False,
                     autoincrement=False,
                     generated=False,
@@ -27,6 +27,6 @@ Schema(
             if_not_exists=False,
             or_replace=False,
             temporary=False,
-        ),
-    )
+        )
+    ]
 )

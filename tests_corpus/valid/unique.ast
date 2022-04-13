@@ -1,11 +1,11 @@
 Schema(
-    tables=(
+    tables=[
         Table(
-            name=("contacts",),
+            name=["contacts"],
             columns=[
                 Column(
                     name="contact_id",
-                    type=Type(name="INTEGER", params=()),
+                    type=Type(name="INTEGER", params=[]),
                     not_null=False,
                     autoincrement=False,
                     generated=False,
@@ -14,7 +14,7 @@ Schema(
                 ),
                 Column(
                     name="first_name",
-                    type=Type(name="TEXT", params=()),
+                    type=Type(name="TEXT", params=[]),
                     not_null=True,
                     autoincrement=False,
                     generated=False,
@@ -23,7 +23,7 @@ Schema(
                 ),
                 Column(
                     name="last_name",
-                    type=Type(name="TEXT", params=()),
+                    type=Type(name="TEXT", params=[]),
                     not_null=True,
                     autoincrement=False,
                     generated=False,
@@ -32,7 +32,7 @@ Schema(
                 ),
                 Column(
                     name="email",
-                    type=Type(name="TEXT", params=()),
+                    type=Type(name="TEXT", params=[]),
                     not_null=True,
                     autoincrement=False,
                     generated=False,
@@ -41,7 +41,7 @@ Schema(
                 ),
                 Column(
                     name="phone",
-                    type=Type(name="TEXT", params=()),
+                    type=Type(name="TEXT", params=[]),
                     not_null=True,
                     autoincrement=False,
                     generated=False,
@@ -52,19 +52,19 @@ Schema(
             constraints=[
                 Uniqueness(
                     name=None,
-                    columns=("contact_id",),
+                    columns=["contact_id"],
                     is_primary=True,
                     on_conflict=OnConflict.ABORT,
                 ),
                 Uniqueness(
                     name=None,
-                    columns=("email",),
+                    columns=["email"],
                     is_primary=False,
                     on_conflict=OnConflict.IGNORE,
                 ),
                 Uniqueness(
                     name=None,
-                    columns=("phone",),
+                    columns=["phone"],
                     is_primary=False,
                     on_conflict=OnConflict.ABORT,
                 ),
@@ -73,6 +73,6 @@ Schema(
             if_not_exists=False,
             or_replace=False,
             temporary=False,
-        ),
-    )
+        )
+    ]
 )

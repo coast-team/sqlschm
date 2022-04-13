@@ -1,11 +1,11 @@
 Schema(
-    tables=(
+    tables=[
         Table(
-            name=("team",),
+            name=["team"],
             columns=[
                 Column(
                     name="name",
-                    type=Type(name="TEXT", params=()),
+                    type=Type(name="TEXT", params=[]),
                     not_null=True,
                     autoincrement=False,
                     generated=False,
@@ -16,7 +16,7 @@ Schema(
             constraints=[
                 Uniqueness(
                     name=None,
-                    columns=("name",),
+                    columns=["name"],
                     is_primary=True,
                     on_conflict=OnConflict.IGNORE,
                 )
@@ -25,6 +25,6 @@ Schema(
             if_not_exists=False,
             or_replace=False,
             temporary=False,
-        ),
-    )
+        )
+    ]
 )

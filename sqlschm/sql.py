@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum, auto
+from collections.abc import Sequence
 
 
 class _ReprEnum(Enum):
@@ -36,13 +37,13 @@ class OnUpdateDelete(_ReprEnum):
 From the most specific to the least specific.
 e.g. database.schema.table is represented as ("table", "schema", "database")
 """
-QualifiedName = tuple[str, ...]
+QualifiedName = Sequence[str]
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
 class Type:
     name: str
-    params: tuple[int, ...] = tuple()
+    params: Sequence[int] = tuple()
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
@@ -70,7 +71,7 @@ class ConstraintEnforcement:
 @dataclass(frozen=True, kw_only=True, slots=True)
 class Uniqueness:
     name: str | None = None
-    columns: tuple[str, ...]
+    columns: Sequence[str]
     is_primary: bool = False
     on_conflict: OnConflict = OnConflict.ABORT
 
@@ -78,9 +79,9 @@ class Uniqueness:
 @dataclass(frozen=True, kw_only=True, slots=True)
 class ForeignKey:
     name: str | None = None
-    columns: tuple[str, ...]
+    columns: Sequence[str]
     foreign_table: QualifiedName
-    referred_columns: tuple[str, ...] | None = None
+    referred_columns: Sequence[str] | None = None
     on_delete: OnUpdateDelete = OnUpdateDelete.NO_ACTION
     on_update: OnUpdateDelete = OnUpdateDelete.NO_ACTION
     enforcement: ConstraintEnforcement
@@ -98,8 +99,8 @@ class TableOptions:
 @dataclass(frozen=True, kw_only=True, slots=True)
 class Table:
     name: QualifiedName
-    columns: list[Column]
-    constraints: list[Constraint]
+    columns: Sequence[Column]
+    constraints: Sequence[Constraint]
     options: TableOptions = TableOptions()
     if_not_exists: bool = False
     or_replace: bool = False
@@ -108,4 +109,4 @@ class Table:
 
 @dataclass(frozen=True, kw_only=True, slots=True)
 class Schema:
-    tables: tuple[Table, ...]
+    tables: Sequence[Table]

@@ -18,7 +18,7 @@ def parse_schema(src: Iterable[str], /) -> sql.Schema:
     tables: list[sql.Table] = []
     while l.item is not _EOF_TOKEN:
         tables.append(_parse_create_table(l))
-    return sql.Schema(tables=tuple(tables))
+    return sql.Schema(tables=tables)
 
 
 def _parse_create_table(l: Lex, /) -> sql.Table:
@@ -196,11 +196,11 @@ def _parse_type(l: Lex, /) -> sql.Type:
             if l.item is tok.COMMA:
                 type_params.append(_parse_int(l))
             _expect(l, tok.R_PAREN)
-    return sql.Type(name=type_name, params=tuple(type_params))
+    return sql.Type(name=type_name, params=type_params)
 
 
 def _parse_constraint(l: Lex, col_name: str | None, /) -> sql.Constraint | None:
-    columns = tuple() if col_name is None else tuple([col_name])
+    columns = [] if col_name is None else [col_name]
     name = None
     if l.item is tok.CONSTRAINT:
         l.forth()
@@ -240,22 +240,22 @@ def _parse_constraint(l: Lex, col_name: str | None, /) -> sql.Constraint | None:
         raise ParserError(f"'{l.item.val}' cannot start a constraint")
 
 
-def _parse_parens_names(l: Lex, /) -> tuple[str, ...]:
+def _parse_parens_names(l: Lex, /) -> list[str]:
     _expect(l, tok.L_PAREN)
     names = [_parse_name(l)]
     while l.item is tok.COMMA:
         l.forth()
         names.append(_parse_name(l))
     _expect(l, tok.R_PAREN)
-    return tuple(names)
+    return names
 
 
 def _parse_foreign_key_clause(
-    l: Lex, columns: tuple[str, ...], name: str | None, /
+    l: Lex, columns: list[str], name: str | None, /
 ) -> sql.ForeignKey:
     _expect(l, tok.REFERENCES)
     foreign_table = _parse_qualified_name(l)
-    referred_columns: tuple[str, ...] | None = None
+    referred_columns: list[str] | None = None
     on_delete = sql.OnUpdateDelete.NO_ACTION
     on_update = sql.OnUpdateDelete.NO_ACTION
     not_deferrable = False
@@ -350,7 +350,7 @@ def _parse_qualified_name(l: Lex, /) -> sql.QualifiedName:
         l.forth()
         names.append(_parse_name(l))
     names.reverse()
-    return tuple(names)
+    return names
 
 
 def _parse_name(l: Lex, /) -> str:

@@ -1,11 +1,11 @@
 Schema(
-    tables=(
+    tables=[
         Table(
-            name=("person",),
+            name=["person"],
             columns=[
                 Column(
                     name="fullname",
-                    type=Type(name="TEXT", params=()),
+                    type=Type(name="TEXT", params=[]),
                     not_null=False,
                     autoincrement=False,
                     generated=False,
@@ -18,6 +18,6 @@ Schema(
             if_not_exists=False,
             or_replace=False,
             temporary=True,
-        ),
-    )
+        )
+    ]
 )

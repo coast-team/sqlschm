@@ -2,6 +2,15 @@
 
 This project adheres to [Semantic Versioning][semver].
 
+## Unreleased
+
+-   Uniformize sequence types in Schemas
+
+    Previously the schemas used a mix of tuples and lists.
+    It now uses a single type: collections.abc.Sequence
+    This type is abstract and may represent as well a tuple as a list.
+    Moreover, it offers a readonly interface.
+
 ## 0.2.1 (2022-04-12)
 
 -   Fix named constraints parsing
