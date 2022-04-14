@@ -52,19 +52,21 @@ Schema(
             constraints=[
                 Uniqueness(
                     name=None,
-                    columns=["contact_id"],
+                    indexed=[
+                        Indexed(column="contact_id", collation=None, sorting=None)
+                    ],
                     is_primary=True,
                     on_conflict=OnConflict.ABORT,
                 ),
                 Uniqueness(
                     name=None,
-                    columns=["email"],
+                    indexed=[Indexed(column="email", collation=None, sorting=None)],
                     is_primary=False,
                     on_conflict=OnConflict.IGNORE,
                 ),
                 Uniqueness(
                     name=None,
-                    columns=["phone"],
+                    indexed=[Indexed(column="phone", collation=None, sorting=None)],
                     is_primary=False,
                     on_conflict=OnConflict.ABORT,
                 ),

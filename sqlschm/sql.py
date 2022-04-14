@@ -33,6 +33,11 @@ class OnUpdateDelete(_ReprEnum):
     SET_NULL = auto()
 
 
+class Sorting(_ReprEnum):
+    ASC = auto()
+    DESC = auto()
+
+
 """
 From the most specific to the least specific.
 e.g. database.schema.table is represented as ("table", "schema", "database")
@@ -69,9 +74,16 @@ class ConstraintEnforcement:
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
+class Indexed:
+    column: str
+    collation: str | None = None
+    sorting: Sorting | None = None
+
+
+@dataclass(frozen=True, kw_only=True, slots=True)
 class Uniqueness:
     name: str | None = None
-    columns: Sequence[str]
+    indexed: Sequence[Indexed]
     is_primary: bool = False
     on_conflict: OnConflict = OnConflict.ABORT
 

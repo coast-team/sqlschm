@@ -52,7 +52,7 @@ Schema(
             constraints=[
                 Uniqueness(
                     name=None,
-                    columns=["a"],
+                    indexed=[Indexed(column="a", collation=None, sorting=None)],
                     is_primary=True,
                     on_conflict=OnConflict.ABORT,
                 )

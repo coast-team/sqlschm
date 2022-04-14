@@ -25,7 +25,10 @@ Schema(
             constraints=[
                 Uniqueness(
                     name=None,
-                    columns=["contact_id", "group_id"],
+                    indexed=[
+                        Indexed(column="contact_id", collation=None, sorting=None),
+                        Indexed(column="group_id", collation=None, sorting=None),
+                    ],
                     is_primary=True,
                     on_conflict=OnConflict.ABORT,
                 ),
@@ -73,7 +76,9 @@ Schema(
             constraints=[
                 Uniqueness(
                     name=None,
-                    columns=["contact_id"],
+                    indexed=[
+                        Indexed(column="contact_id", collation=None, sorting=None)
+                    ],
                     is_primary=True,
                     on_conflict=OnConflict.ABORT,
                 )
@@ -99,7 +104,7 @@ Schema(
             constraints=[
                 Uniqueness(
                     name=None,
-                    columns=["group_id"],
+                    indexed=[Indexed(column="group_id", collation=None, sorting=None)],
                     is_primary=True,
                     on_conflict=OnConflict.ABORT,
                 )

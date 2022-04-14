@@ -2,6 +2,24 @@
 
 This project adheres to [Semantic Versioning][semver].
 
+## Unreleased
+
+-   BREAKING CHANGES: parse and expose indexed columns in the AST
+
+    SQLite enables to specify the collation and the sorting order
+    of a column inside a unique or primary key constraint.
+
+    The following schema is now properly parsed:
+
+    ```sql
+    CREATE TABLE person(
+        fullname NOT NULL,
+        PRIMARY KEY (fullname COLLATE BINARY ASC)
+    );
+    ```
+
+    Collation and sorting order are exported in the the AST.
+
 ## 0.3.0 (2022-04-13)
 
 -   Uniformize sequence types in Schemas

@@ -25,7 +25,7 @@ Schema(
             constraints=[
                 Uniqueness(
                     name=None,
-                    columns=["name"],
+                    indexed=[Indexed(column="name", collation=None, sorting=None)],
                     is_primary=True,
                     on_conflict=OnConflict.ABORT,
                 ),

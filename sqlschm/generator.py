@@ -43,14 +43,15 @@ def _generate_column_def(col: sql.Column, /) -> str:
 
 def _generate_constraint(constraint: sql.Constraint, /) -> str:
     name = f'CONSTRAINT "{constraint.name}" ' if constraint.name is not None else ""
-    cols = ", ".join(f'"{col}"' for col in constraint.columns)
     if isinstance(constraint, sql.Uniqueness):
+        idxs = ", ".join(_generate_indexed(idx) for idx in constraint.indexed)
         on_conflict = _generate_on_conflict(constraint.on_conflict)
         if constraint.is_primary:
-            return f"{name}PRIMARY KEY ({cols}){on_conflict}"
+            return f"{name}PRIMARY KEY ({idxs}){on_conflict}"
         else:
-            return f"{name}UNIQUE ({cols}){on_conflict}"
+            return f"{name}UNIQUE ({idxs}){on_conflict}"
     else:
+        cols = ", ".join(f'"{col}"' for col in constraint.columns)
         assert isinstance(constraint, sql.ForeignKey)
         foreign_table = _generate_qualified_name(constraint.foreign_table)
         referred_columns = (
@@ -71,6 +72,16 @@ def _generate_constraint(constraint: sql.Constraint, /) -> str:
             + f"REFERENCES {foreign_table}{referred_columns}"
             + f"{on_update}{on_delete}{not_deferrable}{initially_deferred}"
         )
+
+
+def _generate_indexed(indexed: sql.Indexed, /) -> str:
+    collation = ""
+    sorting = ""
+    if indexed.collation is not None:
+        collation = f" COLLATE {indexed.collation}"
+    if indexed.sorting is not None:
+        sorting = f" {indexed.sorting.name}"
+    return f'"{indexed.column}"{collation}{sorting}'
 
 
 def _generate_on_conflict(on_conflict: sql.OnConflict, /) -> str:

@@ -1,0 +1,4 @@
+CREATE TABLE person(
+    fullname NOT NULL PRIMARY KEY ASC COLLATE BINARY,
+    birthday DEFAULT NULL
+);

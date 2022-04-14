@@ -1,5 +1,6 @@
 from typing import Iterable
 from sqlschm import sql, tok, lexer
+import dataclasses
 
 Lex = lexer.ItemCursor[tok.Token]
 
@@ -86,6 +87,7 @@ def _parse_column_def(l: Lex, /) -> tuple[sql.Column, list[sql.Constraint]]:
     generated = False
     default = None
     collation = None
+    pk: sql.Uniqueness | None = None
     col_constraints: list[sql.Constraint] = []
     while l.item is not tok.COMMA and l.item is not tok.R_PAREN:
         if l.item is tok.NULL:
@@ -98,8 +100,7 @@ def _parse_column_def(l: Lex, /) -> tuple[sql.Column, list[sql.Constraint]]:
         elif l.item is tok.DEFAULT:
             default = _parse_default(l)
         elif l.item is tok.COLLATE:
-            l.forth()
-            collation = _parse_name(l)
+            collation = _parse_collation(l)
         elif l.item is tok.GENERATED or l.item is tok.AS:
             if l.item is tok.GENERATED:
                 l.forth()
@@ -128,8 +129,17 @@ def _parse_column_def(l: Lex, /) -> tuple[sql.Column, list[sql.Constraint]]:
             autoincrement = True
         else:
             constraint = _parse_constraint(l, colname)
-            if constraint is not None:
+            if isinstance(constraint, sql.Uniqueness) and constraint.is_primary:
+                pk = constraint
+            elif constraint is not None:
                 col_constraints.append(constraint)
+    if pk is not None:
+        if collation is not None:
+            assert len(pk.indexed) == 1, "only one column"
+            pk = dataclasses.replace(
+                pk, indexed=[dataclasses.replace(pk.indexed[0], collation=collation)]
+            )
+        col_constraints.insert(0, pk)
     return (
         sql.Column(
             name=colname,
@@ -201,6 +211,7 @@ def _parse_type(l: Lex, /) -> sql.Type:
 
 def _parse_constraint(l: Lex, col_name: str | None, /) -> sql.Constraint | None:
     columns = [] if col_name is None else [col_name]
+    indexed: list[sql.Indexed] = []
     name = None
     if l.item is tok.CONSTRAINT:
         l.forth()
@@ -208,23 +219,26 @@ def _parse_constraint(l: Lex, col_name: str | None, /) -> sql.Constraint | None:
     if l.item is tok.PRIMARY:
         l.forth()
         _expect(l, tok.KEY)
-        if l.item is tok.ASC or l.item is tok.DESC:
-            l.forth()
         if col_name is None:
-            columns = _parse_parens_names(l)
+            indexed = _parse_indexed_names(l)
+        else:
+            sorting = _parse_optional_sorting(l)
+            indexed = [sql.Indexed(column=col_name, sorting=sorting)]
         on_conflict = _parse_on_conflict(l)
         return sql.Uniqueness(
             name=name,
-            columns=columns,
+            indexed=indexed,
             is_primary=True,
             on_conflict=on_conflict,
         )
     elif l.item is tok.UNIQUE:
         l.forth()
         if col_name is None:
-            columns = _parse_parens_names(l)
+            indexed = _parse_indexed_names(l)
+        else:
+            indexed = [sql.Indexed(column=col_name)]
         on_conflict = _parse_on_conflict(l)
-        return sql.Uniqueness(name=name, columns=columns, on_conflict=on_conflict)
+        return sql.Uniqueness(name=name, indexed=indexed, on_conflict=on_conflict)
     elif l.item is tok.CHECK:
         l.forth()
         skip_parens(l)
@@ -240,14 +254,48 @@ def _parse_constraint(l: Lex, col_name: str | None, /) -> sql.Constraint | None:
         raise ParserError(f"'{l.item.val}' cannot start a constraint")
 
 
-def _parse_parens_names(l: Lex, /) -> list[str]:
+def _parse_collation(l: Lex, /) -> str:
+    _expect(l, tok.COLLATE)
+    return _parse_name(l)
+
+
+def _parse_indexed_names(l: Lex, /) -> list[sql.Indexed]:
     _expect(l, tok.L_PAREN)
-    names = [_parse_name(l)]
+    result = [_parse_indexed_name(l)]
     while l.item is tok.COMMA:
         l.forth()
-        names.append(_parse_name(l))
+        result.append(_parse_indexed_name(l))
     _expect(l, tok.R_PAREN)
-    return names
+    return result
+
+
+def _parse_indexed_name(l: Lex, /) -> sql.Indexed:
+    column = _parse_name(l)
+    collation = None
+    if l.item is tok.COLLATE:
+        collation = _parse_collation(l)
+    sorting = _parse_optional_sorting(l)
+    return sql.Indexed(column=column, collation=collation, sorting=sorting)
+
+
+def _parse_optional_sorting(l: Lex, /) -> sql.Sorting | None:
+    if l.item is tok.ASC:
+        l.forth()
+        return sql.Sorting.ASC
+    elif l.item is tok.DESC:
+        l.forth()
+        return sql.Sorting.DESC
+    return None
+
+
+def _parse_parens_names(l: Lex, /) -> list[str]:
+    _expect(l, tok.L_PAREN)
+    result = [_parse_name(l)]
+    while l.item is tok.COMMA:
+        l.forth()
+        result.append(_parse_name(l))
+    _expect(l, tok.R_PAREN)
+    return result
 
 
 def _parse_foreign_key_clause(

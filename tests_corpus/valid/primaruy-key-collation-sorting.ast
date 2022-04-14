@@ -4,26 +4,17 @@ Schema(
             name=["person"],
             columns=[
                 Column(
-                    name="id",
-                    type=Type(name="INTEGER", params=[]),
-                    not_null=False,
+                    name="fullname",
+                    type=Type(name="", params=[]),
+                    not_null=True,
                     autoincrement=False,
                     generated=False,
                     default=None,
                     collation=None,
                 ),
                 Column(
-                    name="name",
-                    type=Type(name="TEXT", params=[]),
-                    not_null=False,
-                    autoincrement=False,
-                    generated=False,
-                    default=Default(),
-                    collation=None,
-                ),
-                Column(
-                    name="age",
-                    type=Type(name="INTEGER", params=[]),
+                    name="birthday",
+                    type=Type(name="", params=[]),
                     not_null=False,
                     autoincrement=False,
                     generated=False,
@@ -34,7 +25,11 @@ Schema(
             constraints=[
                 Uniqueness(
                     name=None,
-                    indexed=[Indexed(column="id", collation=None, sorting=None)],
+                    indexed=[
+                        Indexed(
+                            column="fullname", collation="BINARY", sorting=Sorting.ASC
+                        )
+                    ],
                     is_primary=True,
                     on_conflict=OnConflict.ABORT,
                 )
