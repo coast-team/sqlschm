@@ -18,6 +18,15 @@ class ConstraintEnforcementTime(_ReprEnum):
     IMMEDIATE = auto()
 
 
+class Match(_ReprEnum):
+    FULL = auto()
+    PARTIAL = auto()
+    SIMPLE = auto()
+
+
+MATCH: frozenset[str] = frozenset(member.name for member in Match)
+
+
 # SQLite specific
 class OnConflict(_ReprEnum):
     ABORT = auto()
@@ -102,6 +111,7 @@ class ForeignKey:
     referred_columns: Sequence[str] | None = None
     on_delete: OnUpdateDelete | None = None
     on_update: OnUpdateDelete | None = None
+    match: Match | None = None
     enforcement: ConstraintEnforcement | None = None
 
 

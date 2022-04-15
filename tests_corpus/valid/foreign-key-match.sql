@@ -1,0 +1,4 @@
+CREATE TABLE person(
+    fullname text NOT NULL PRIMARY KEY,
+    friend text REFERENCES person(fullname) MATCH FULL
+);

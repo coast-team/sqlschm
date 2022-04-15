@@ -38,6 +38,7 @@ Schema(
                     referred_columns=["fullname"],
                     on_delete=OnUpdateDelete.SET_NULL,
                     on_update=OnUpdateDelete.CASCADE,
+                    match=None,
                     enforcement=None,
                 ),
             ],

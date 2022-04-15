@@ -38,6 +38,7 @@ Schema(
                     referred_columns=["fullname"],
                     on_delete=None,
                     on_update=None,
+                    match=None,
                     enforcement=None,
                 ),
             ],

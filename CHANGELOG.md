@@ -4,6 +4,8 @@ This project adheres to [Semantic Versioning][semver].
 
 ## Unreleased
 
+-   Expose foreign keys' match value in the AST
+
 -   BREAKING CHANGES: parse and expose indexed columns in the AST
 
     SQLite enables to specify the collation and the sorting order

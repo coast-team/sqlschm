@@ -38,11 +38,8 @@ Schema(
                     referred_columns=["fullname"],
                     on_delete=None,
                     on_update=None,
-                    match=None,
-                    enforcement=ConstraintEnforcement(
-                        initially=ConstraintEnforcementTime.DEFERRED,
-                        not_deferrable=False,
-                    ),
+                    match=Match.FULL,
+                    enforcement=None,
                 ),
             ],
             options=TableOptions(strict=False, without_rowid=False),

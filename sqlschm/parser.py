@@ -308,6 +308,7 @@ def _parse_foreign_key_clause(
     referred_columns: list[str] | None = None
     on_delete: sql.OnUpdateDelete | None = None
     on_update: sql.OnUpdateDelete | None = None
+    match: sql.Match | None = None
     if l.item is tok.L_PAREN:
         referred_columns = _parse_parens_names(l)
     while l.item is tok.ON or l.item is tok.MATCH:
@@ -323,7 +324,10 @@ def _parse_foreign_key_clause(
                 raise ParserError("'ON DELETE' or 'ON UPDATE' is expected")
         elif l.item is tok.MATCH:
             l.forth()
-            l.forth()  # consume FULL or PARTIAL or SIMPLE
+            match_name = _parse_name(l).upper()
+            if match_name not in sql.MATCH:
+                raise ParserError("invalid MATCH name")
+            match = sql.Match[match_name]
     enforcement = _parse_constraint_enforcement(l)
     return sql.ForeignKey(
         name=name,
@@ -332,6 +336,7 @@ def _parse_foreign_key_clause(
         referred_columns=referred_columns,
         on_delete=on_delete,
         on_update=on_update,
+        match=match,
         enforcement=enforcement,
     )
 

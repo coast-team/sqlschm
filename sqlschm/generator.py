@@ -62,11 +62,14 @@ def _generate_constraint(constraint: sql.Constraint, /) -> str:
         )
         on_update = _generate_on_update_delete(constraint.on_update, True)
         on_delete = _generate_on_update_delete(constraint.on_delete, False)
+        match = (
+            f" MATCH {constraint.match.name}" if constraint.match is not None else ""
+        )
         enforcement = _generate_constraint_enforcement(constraint.enforcement)
         return (
             f"{name}FOREIGN KEY ({cols}) "
             + f"REFERENCES {foreign_table}{referred_columns}"
-            + f"{on_update}{on_delete}{enforcement}"
+            + f"{on_update}{on_delete}{match}{enforcement}"
         )
 
 
