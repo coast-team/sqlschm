@@ -7,6 +7,7 @@ Schema(
                     name="contact_id",
                     type=Type(name="INTEGER", params=[]),
                     not_null=False,
+                    not_null_on_conflict=None,
                     autoincrement=False,
                     generated=False,
                     default=None,
@@ -16,6 +17,7 @@ Schema(
                     name="group_id",
                     type=Type(name="INTEGER", params=[]),
                     not_null=False,
+                    not_null_on_conflict=None,
                     autoincrement=False,
                     generated=False,
                     default=None,
@@ -30,7 +32,7 @@ Schema(
                         Indexed(column="group_id", collation=None, sorting=None),
                     ],
                     is_primary=True,
-                    on_conflict=OnConflict.ABORT,
+                    on_conflict=None,
                 ),
                 ForeignKey(
                     name=None,
@@ -39,9 +41,7 @@ Schema(
                     referred_columns=["contact_id"],
                     on_delete=OnUpdateDelete.CASCADE,
                     on_update=OnUpdateDelete.NO_ACTION,
-                    enforcement=ConstraintEnforcement(
-                        initially_deferred=False, not_deferrable=False
-                    ),
+                    enforcement=None,
                 ),
                 ForeignKey(
                     name=None,
@@ -50,9 +50,7 @@ Schema(
                     referred_columns=["group_id"],
                     on_delete=OnUpdateDelete.CASCADE,
                     on_update=OnUpdateDelete.NO_ACTION,
-                    enforcement=ConstraintEnforcement(
-                        initially_deferred=False, not_deferrable=False
-                    ),
+                    enforcement=None,
                 ),
             ],
             options=TableOptions(strict=False, without_rowid=False),
@@ -67,6 +65,7 @@ Schema(
                     name="contact_id",
                     type=Type(name="INTEGER", params=[]),
                     not_null=False,
+                    not_null_on_conflict=None,
                     autoincrement=False,
                     generated=False,
                     default=None,
@@ -80,7 +79,7 @@ Schema(
                         Indexed(column="contact_id", collation=None, sorting=None)
                     ],
                     is_primary=True,
-                    on_conflict=OnConflict.ABORT,
+                    on_conflict=None,
                 )
             ],
             options=TableOptions(strict=False, without_rowid=False),
@@ -95,6 +94,7 @@ Schema(
                     name="group_id",
                     type=Type(name="INTEGER", params=[]),
                     not_null=False,
+                    not_null_on_conflict=None,
                     autoincrement=False,
                     generated=False,
                     default=None,
@@ -106,7 +106,7 @@ Schema(
                     name=None,
                     indexed=[Indexed(column="group_id", collation=None, sorting=None)],
                     is_primary=True,
-                    on_conflict=OnConflict.ABORT,
+                    on_conflict=None,
                 )
             ],
             options=TableOptions(strict=False, without_rowid=False),

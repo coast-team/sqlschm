@@ -7,6 +7,7 @@ Schema(
                     name="name",
                     type=Type(name="TEXT", params=[]),
                     not_null=True,
+                    not_null_on_conflict=None,
                     autoincrement=False,
                     generated=False,
                     default=None,
@@ -16,6 +17,7 @@ Schema(
                     name="captain",
                     type=Type(name="", params=[]),
                     not_null=False,
+                    not_null_on_conflict=None,
                     autoincrement=False,
                     generated=False,
                     default=None,
@@ -27,7 +29,7 @@ Schema(
                     name=None,
                     indexed=[Indexed(column="name", collation=None, sorting=None)],
                     is_primary=True,
-                    on_conflict=OnConflict.ABORT,
+                    on_conflict=None,
                 ),
                 ForeignKey(
                     name=None,
@@ -36,9 +38,7 @@ Schema(
                     referred_columns=["fullname"],
                     on_delete=OnUpdateDelete.SET_NULL,
                     on_update=OnUpdateDelete.CASCADE,
-                    enforcement=ConstraintEnforcement(
-                        initially_deferred=False, not_deferrable=False
-                    ),
+                    enforcement=None,
                 ),
             ],
             options=TableOptions(strict=False, without_rowid=False),

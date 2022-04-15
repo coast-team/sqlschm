@@ -13,6 +13,11 @@ class Dialect(_ReprEnum):
     SQLITE = auto()
 
 
+class ConstraintEnforcementTime(_ReprEnum):
+    DEFERRED = auto()
+    IMMEDIATE = auto()
+
+
 # SQLite specific
 class OnConflict(_ReprEnum):
     ABORT = auto()
@@ -61,6 +66,7 @@ class Column:
     name: str
     type: Type
     not_null: bool = False
+    not_null_on_conflict: OnConflict | None = None
     autoincrement: bool = False
     generated: bool = False
     default: Default | None = None
@@ -69,7 +75,7 @@ class Column:
 
 @dataclass(frozen=True, kw_only=True, slots=True)
 class ConstraintEnforcement:
-    initially_deferred: bool = False
+    initially: ConstraintEnforcementTime | None = None
     not_deferrable: bool = False
 
 
@@ -85,7 +91,7 @@ class Uniqueness:
     name: str | None = None
     indexed: Sequence[Indexed]
     is_primary: bool = False
-    on_conflict: OnConflict = OnConflict.ABORT
+    on_conflict: OnConflict | None = None
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
@@ -94,9 +100,9 @@ class ForeignKey:
     columns: Sequence[str]
     foreign_table: QualifiedName
     referred_columns: Sequence[str] | None = None
-    on_delete: OnUpdateDelete = OnUpdateDelete.NO_ACTION
-    on_update: OnUpdateDelete = OnUpdateDelete.NO_ACTION
-    enforcement: ConstraintEnforcement
+    on_delete: OnUpdateDelete | None = None
+    on_update: OnUpdateDelete | None = None
+    enforcement: ConstraintEnforcement | None = None
 
 
 Constraint = Uniqueness | ForeignKey

@@ -83,6 +83,7 @@ def _parse_column_def(l: Lex, /) -> tuple[sql.Column, list[sql.Constraint]]:
     colname = _parse_name(l)
     coltype = _parse_type(l)
     not_null = False
+    not_null_on_conflict: sql.OnConflict | None = None
     autoincrement = False
     generated = False
     default = None
@@ -95,7 +96,7 @@ def _parse_column_def(l: Lex, /) -> tuple[sql.Column, list[sql.Constraint]]:
         elif l.item is tok.NOT:
             l.forth()
             _expect(l, tok.NULL)
-            _parse_on_conflict(l)
+            not_null_on_conflict = _parse_on_conflict(l)
             not_null = True
         elif l.item is tok.DEFAULT:
             default = _parse_default(l)
@@ -145,6 +146,7 @@ def _parse_column_def(l: Lex, /) -> tuple[sql.Column, list[sql.Constraint]]:
             name=colname,
             type=coltype,
             not_null=not_null,
+            not_null_on_conflict=not_null_on_conflict,
             autoincrement=autoincrement,
             generated=generated,
             default=default,
@@ -304,10 +306,8 @@ def _parse_foreign_key_clause(
     _expect(l, tok.REFERENCES)
     foreign_table = _parse_qualified_name(l)
     referred_columns: list[str] | None = None
-    on_delete = sql.OnUpdateDelete.NO_ACTION
-    on_update = sql.OnUpdateDelete.NO_ACTION
-    not_deferrable = False
-    initially_deferred = False
+    on_delete: sql.OnUpdateDelete | None = None
+    on_update: sql.OnUpdateDelete | None = None
     if l.item is tok.L_PAREN:
         referred_columns = _parse_parens_names(l)
     while l.item is tok.ON or l.item is tok.MATCH:
@@ -324,17 +324,7 @@ def _parse_foreign_key_clause(
         elif l.item is tok.MATCH:
             l.forth()
             l.forth()  # consume FULL or PARTIAL or SIMPLE
-    if l.item is tok.NOT and l.next_item is tok.DEFERRABLE:
-        l.forth()
-        not_deferrable = True
-    if l.item is tok.DEFERRABLE:
-        l.forth()
-        if l.item is tok.INITIALLY:
-            l.forth()
-            if not (l.item is tok.DEFERRED or l.item is tok.IMMEDIATE):
-                raise ParserError(f"'{l.item.val}' is not a valid dererrable state")
-            initially_deferred = l.item.val is tok.DEFERRED
-            l.forth()
+    enforcement = _parse_constraint_enforcement(l)
     return sql.ForeignKey(
         name=name,
         columns=columns,
@@ -342,10 +332,42 @@ def _parse_foreign_key_clause(
         referred_columns=referred_columns,
         on_delete=on_delete,
         on_update=on_update,
-        enforcement=sql.ConstraintEnforcement(
-            initially_deferred=initially_deferred, not_deferrable=not_deferrable
-        ),
+        enforcement=enforcement,
     )
+
+
+def _parse_constraint_enforcement(l: Lex, /) -> sql.ConstraintEnforcement | None:
+    initially = _parse_constraint_enforcement_time(l)
+    not_deferrable = None
+    if l.item is tok.NOT and l.next_item is tok.DEFERRABLE:
+        l.forth()
+        not_deferrable = True
+    if l.item is tok.DEFERRABLE:
+        l.forth()
+        not_deferrable = False
+        if initially is None:
+            initially = _parse_constraint_enforcement_time(l)
+    if not_deferrable is not None:
+        return sql.ConstraintEnforcement(
+            initially=initially, not_deferrable=not_deferrable
+        )
+    return None
+
+
+def _parse_constraint_enforcement_time(
+    l: Lex, /
+) -> sql.ConstraintEnforcementTime | None:
+    if l.item is tok.INITIALLY:
+        l.forth()
+        if l.item is tok.DEFERRED:
+            l.forth()
+            return sql.ConstraintEnforcementTime.DEFERRED
+        elif l.item is tok.IMMEDIATE:
+            l.forth()
+            return sql.ConstraintEnforcementTime.IMMEDIATE
+        else:
+            raise ParserError(f"'{l.item.val}' is not a valid enforcement time")
+    return None
 
 
 def _parse_on_updatedelete_action(l: Lex, /) -> sql.OnUpdateDelete:
@@ -371,7 +393,7 @@ def _parse_on_updatedelete_action(l: Lex, /) -> sql.OnUpdateDelete:
         raise ParserError("'Invalid ON DELETE/UPDATE action")
 
 
-def _parse_on_conflict(l: Lex, /) -> sql.OnConflict:
+def _parse_on_conflict(l: Lex, /) -> sql.OnConflict | None:
     if l.item is tok.ON:
         l.forth()
         _expect(l, tok.CONFLICT)
@@ -381,7 +403,7 @@ def _parse_on_conflict(l: Lex, /) -> sql.OnConflict:
         l.forth()
         return result
     else:
-        return sql.OnConflict.ABORT  # Default
+        return None
 
 
 def _parse_int(l: Lex, /) -> int:

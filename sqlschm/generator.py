@@ -35,7 +35,8 @@ def _generate_create_table(table: sql.Table, /) -> str:
 
 def _generate_column_def(col: sql.Column, /) -> str:
     coltype = " " + _generate_type(col.type) if col.type.name != "" else ""
-    not_null = " NOT NULL" if col.not_null else ""
+    not_null_on_conflict = _generate_on_conflict(col.not_null_on_conflict)
+    not_null = f" NOT NULL{not_null_on_conflict}" if col.not_null else ""
     autoincr = " AUTOINCREMENT" if col.autoincrement else ""
     collation = f" COLLATE {col.collation}" if col.collation is not None else ""
     return f'"{col.name}"{coltype}{not_null}{autoincr}{collation}'
@@ -61,17 +62,27 @@ def _generate_constraint(constraint: sql.Constraint, /) -> str:
         )
         on_update = _generate_on_update_delete(constraint.on_update, True)
         on_delete = _generate_on_update_delete(constraint.on_delete, False)
-        not_deferrable = (
-            " NOT DEFERRABLE" if constraint.enforcement.not_deferrable else ""
-        )
-        initially_deferred = (
-            " INITIALLY DEFERRED" if constraint.enforcement.initially_deferred else ""
-        )
+        enforcement = _generate_constraint_enforcement(constraint.enforcement)
         return (
             f"{name}FOREIGN KEY ({cols}) "
             + f"REFERENCES {foreign_table}{referred_columns}"
-            + f"{on_update}{on_delete}{not_deferrable}{initially_deferred}"
+            + f"{on_update}{on_delete}{enforcement}"
         )
+
+
+def _generate_constraint_enforcement(
+    enforcement: sql.ConstraintEnforcement | None,
+) -> str:
+    if enforcement is not None:
+        not_deferrable = (
+            " NOT DEFERRABLE" if enforcement.not_deferrable else " DEFERRABLE"
+        )
+        if enforcement.initially is not None:
+            initially = f" INITIALLY {enforcement.initially.name}"
+        else:
+            initially = ""
+        return f"{not_deferrable}{initially}"
+    return ""
 
 
 def _generate_indexed(indexed: sql.Indexed, /) -> str:
@@ -84,22 +95,23 @@ def _generate_indexed(indexed: sql.Indexed, /) -> str:
     return f'"{indexed.column}"{collation}{sorting}'
 
 
-def _generate_on_conflict(on_conflict: sql.OnConflict, /) -> str:
-    if on_conflict is sql.OnConflict.ABORT:
+def _generate_on_conflict(on_conflict: sql.OnConflict | None, /) -> str:
+    if on_conflict is None:
         return ""
     else:
         return f" ON CONFLICT {on_conflict.name}"
 
 
-def _generate_on_update_delete(action: sql.OnUpdateDelete, on_update: bool, /) -> str:
-    if action is sql.OnUpdateDelete.NO_ACTION:
-        return ""
-    else:
+def _generate_on_update_delete(
+    action: sql.OnUpdateDelete | None, on_update: bool, /
+) -> str:
+    if action is not None:
         action_name = action.name.replace("_", " ")
         if on_update:
             return f" ON UPDATE {action_name}"
         else:
             return f" ON DELETE {action_name}"
+    return ""
 
 
 def _generate_type(type: sql.Type | None, /) -> str:

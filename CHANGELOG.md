@@ -20,6 +20,13 @@ This project adheres to [Semantic Versioning][semver].
 
     Collation and sorting order are exported in the the AST.
 
+-   BREAKING CHANGES: more generic AST
+
+    Previously the parser did assumptions about the default values of
+    some clause. It now do less assumption and thus it is more generic.
+
+    Some node of the AST accept now None.
+
 ## 0.3.0 (2022-04-13)
 
 -   Uniformize sequence types in Schemas

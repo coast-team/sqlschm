@@ -7,6 +7,7 @@ Schema(
                     name="fullname",
                     type=Type(name="TEXT", params=[]),
                     not_null=False,
+                    not_null_on_conflict=None,
                     autoincrement=False,
                     generated=False,
                     default=None,
