@@ -2,7 +2,7 @@
 
 This project adheres to [Semantic Versioning][semver].
 
-## Unreleased
+## 0.5.0 (2022-04-21)
 
 -   BREAKING CHANGES: Lossless parsing
 
