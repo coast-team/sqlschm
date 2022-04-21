@@ -6,36 +6,37 @@ Schema(
                 Column(
                     name="fullname",
                     type=Type(name="", params=[]),
-                    not_null=True,
-                    not_null_on_conflict=None,
-                    autoincrement=False,
-                    generated=False,
-                    default=None,
-                    collation="BINARY",
+                    constraints=[
+                        NotNull(name=None, on_conflict=None),
+                        Uniqueness(
+                            name=None,
+                            is_table_constraint=False,
+                            indexed=[
+                                Indexed(
+                                    column="fullname",
+                                    collation=None,
+                                    sorting=Sorting.ASC,
+                                )
+                            ],
+                            is_primary=True,
+                            autoincrement=False,
+                            on_conflict=None,
+                        ),
+                        Collation(name=None, value="BINARY"),
+                    ],
                 ),
                 Column(
                     name="birthday",
                     type=Type(name="", params=[]),
-                    not_null=False,
-                    not_null_on_conflict=None,
-                    autoincrement=False,
-                    generated=False,
-                    default=Default(),
-                    collation=None,
-                ),
-            ],
-            constraints=[
-                Uniqueness(
-                    name=None,
-                    indexed=[
-                        Indexed(
-                            column="fullname", collation="BINARY", sorting=Sorting.ASC
+                    constraints=[
+                        Default(
+                            name=None,
+                            expr=[Token(kind=TokenKind.KEYWORD_LITERAL, val="NULL")],
                         )
                     ],
-                    is_primary=True,
-                    on_conflict=None,
-                )
+                ),
             ],
+            constraints=[],
             options=TableOptions(strict=False, without_rowid=False),
             if_not_exists=False,
             or_replace=False,

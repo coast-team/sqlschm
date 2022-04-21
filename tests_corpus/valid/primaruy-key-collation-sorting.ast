@@ -1,38 +1,37 @@
 Schema(
     tables=[
         Table(
-            name=["person"],
+            name=["personF"],
             columns=[
                 Column(
                     name="fullname",
                     type=Type(name="", params=[]),
-                    not_null=True,
-                    not_null_on_conflict=None,
-                    autoincrement=False,
-                    generated=False,
-                    default=None,
-                    collation=None,
+                    constraints=[NotNull(name=None, on_conflict=None)],
                 ),
                 Column(
                     name="birthday",
                     type=Type(name="", params=[]),
-                    not_null=False,
-                    not_null_on_conflict=None,
-                    autoincrement=False,
-                    generated=False,
-                    default=Default(),
-                    collation=None,
+                    constraints=[
+                        Default(
+                            name=None,
+                            expr=[Token(kind=TokenKind.KEYWORD_LITERAL, val="NULL")],
+                        )
+                    ],
                 ),
             ],
             constraints=[
                 Uniqueness(
                     name=None,
+                    is_table_constraint=True,
                     indexed=[
                         Indexed(
-                            column="fullname", collation="BINARY", sorting=Sorting.ASC
+                            column="fullname",
+                            collation=Collation(name=None, value="BINARY"),
+                            sorting=Sorting.ASC,
                         )
                     ],
                     is_primary=True,
+                    autoincrement=False,
                     on_conflict=None,
                 )
             ],

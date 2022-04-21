@@ -7,11 +7,9 @@ CREATE TABLE "contact_groups"(
 );
 
 CREATE TABLE "contacts"(
-    "contact_id" integer,
-    PRIMARY KEY ("contact_id")
+    "contact_id" integer PRIMARY KEY
 );
 
 CREATE TABLE "GROUPS"(
-    "group_id" integer,
-    PRIMARY KEY ("group_id")
+    "group_id" integer PRIMARY KEY
 );

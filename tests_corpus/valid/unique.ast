@@ -6,76 +6,67 @@ Schema(
                 Column(
                     name="contact_id",
                     type=Type(name="INTEGER", params=[]),
-                    not_null=False,
-                    not_null_on_conflict=None,
-                    autoincrement=False,
-                    generated=False,
-                    default=None,
-                    collation=None,
+                    constraints=[
+                        Uniqueness(
+                            name=None,
+                            is_table_constraint=False,
+                            indexed=[
+                                Indexed(
+                                    column="contact_id", collation=None, sorting=None
+                                )
+                            ],
+                            is_primary=True,
+                            autoincrement=False,
+                            on_conflict=None,
+                        )
+                    ],
                 ),
                 Column(
                     name="first_name",
                     type=Type(name="TEXT", params=[]),
-                    not_null=True,
-                    not_null_on_conflict=None,
-                    autoincrement=False,
-                    generated=False,
-                    default=None,
-                    collation=None,
+                    constraints=[NotNull(name=None, on_conflict=None)],
                 ),
                 Column(
                     name="last_name",
                     type=Type(name="TEXT", params=[]),
-                    not_null=True,
-                    not_null_on_conflict=None,
-                    autoincrement=False,
-                    generated=False,
-                    default=None,
-                    collation=None,
+                    constraints=[NotNull(name=None, on_conflict=None)],
                 ),
                 Column(
                     name="email",
                     type=Type(name="TEXT", params=[]),
-                    not_null=True,
-                    not_null_on_conflict=None,
-                    autoincrement=False,
-                    generated=False,
-                    default=None,
-                    collation=None,
+                    constraints=[
+                        NotNull(name=None, on_conflict=None),
+                        Uniqueness(
+                            name=None,
+                            is_table_constraint=False,
+                            indexed=[
+                                Indexed(column="email", collation=None, sorting=None)
+                            ],
+                            is_primary=False,
+                            autoincrement=False,
+                            on_conflict=OnConflict.IGNORE,
+                        ),
+                    ],
                 ),
                 Column(
                     name="phone",
                     type=Type(name="TEXT", params=[]),
-                    not_null=True,
-                    not_null_on_conflict=None,
-                    autoincrement=False,
-                    generated=False,
-                    default=None,
-                    collation=None,
-                ),
-            ],
-            constraints=[
-                Uniqueness(
-                    name=None,
-                    indexed=[
-                        Indexed(column="contact_id", collation=None, sorting=None)
+                    constraints=[
+                        NotNull(name=None, on_conflict=None),
+                        Uniqueness(
+                            name=None,
+                            is_table_constraint=False,
+                            indexed=[
+                                Indexed(column="phone", collation=None, sorting=None)
+                            ],
+                            is_primary=False,
+                            autoincrement=False,
+                            on_conflict=None,
+                        ),
                     ],
-                    is_primary=True,
-                    on_conflict=None,
-                ),
-                Uniqueness(
-                    name=None,
-                    indexed=[Indexed(column="email", collation=None, sorting=None)],
-                    is_primary=False,
-                    on_conflict=OnConflict.IGNORE,
-                ),
-                Uniqueness(
-                    name=None,
-                    indexed=[Indexed(column="phone", collation=None, sorting=None)],
-                    is_primary=False,
-                    on_conflict=None,
                 ),
             ],
+            constraints=[],
             options=TableOptions(strict=False, without_rowid=False),
             if_not_exists=False,
             or_replace=False,

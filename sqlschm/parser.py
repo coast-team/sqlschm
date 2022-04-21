@@ -1,6 +1,5 @@
 from typing import Iterable
 from sqlschm import sql, tok, lexer
-import dataclasses
 
 Lex = lexer.ItemCursor[tok.Token]
 
@@ -46,21 +45,15 @@ def _parse_create_table(l: Lex, /) -> sql.Table:
         raise ParserError(f"'CREATE TABLE {l.item.val}' is not supported.")
     _expect(l, tok.L_PAREN)
     columns: list[sql.Column] = []
-    constraints: list[sql.Constraint] = []
+    constraints: list[sql.TableConstraint] = []
     if l.item is not tok.R_PAREN:
-        (column, col_constraint) = _parse_column_def(l)
-        columns.append(column)
-        constraints += col_constraint
+        columns.append(_parse_column_def(l))
         while l.item is tok.COMMA and l.next_item.kind is not tok.TokenKind.KEYWORD:
             l.forth()
-            (column, col_constraint) = _parse_column_def(l)
-            columns.append(column)
-            constraints += col_constraint
+            columns.append(_parse_column_def(l))
         while l.item is tok.COMMA:
             l.forth()
-            constraint = _parse_constraint(l, None)
-            if constraint is not None:
-                constraints.append(constraint)
+            constraints.append(_parse_table_constraint(l))
         _expect(l, tok.R_PAREN)
     options = _parse_table_options(l)
     if l.item is tok.SELECT:
@@ -79,99 +72,13 @@ def _parse_create_table(l: Lex, /) -> sql.Table:
     )
 
 
-def _parse_column_def(l: Lex, /) -> tuple[sql.Column, list[sql.Constraint]]:
+def _parse_column_def(l: Lex, /) -> sql.Column:
     colname = _parse_name(l)
     coltype = _parse_type(l)
-    not_null = False
-    not_null_on_conflict: sql.OnConflict | None = None
-    autoincrement = False
-    generated = False
-    default = None
-    collation = None
-    pk: sql.Uniqueness | None = None
-    col_constraints: list[sql.Constraint] = []
+    constraints: list[sql.ColumnConstraint] = []
     while l.item is not tok.COMMA and l.item is not tok.R_PAREN:
-        if l.item is tok.NULL:
-            l.forth()
-        elif l.item is tok.NOT:
-            l.forth()
-            _expect(l, tok.NULL)
-            not_null_on_conflict = _parse_on_conflict(l)
-            not_null = True
-        elif l.item is tok.DEFAULT:
-            default = _parse_default(l)
-        elif l.item is tok.COLLATE:
-            collation = _parse_collation(l)
-        elif l.item is tok.GENERATED or l.item is tok.AS:
-            if l.item is tok.GENERATED:
-                l.forth()
-                if l.item is tok.ALWAYS:
-                    l.forth()
-                elif l.item is tok.BY and l.next_item is tok.DEFAULT:
-                    l.forth()
-                    l.forth()
-                else:
-                    raise ParserError("'ALWAYS' or 'BY DEFAULT' is expected.")
-                _expect(l, tok.AS)
-                if l.item is tok.IDENTITY:
-                    l.forth()
-            else:
-                l.forth()
-            skip_parens(l)
-            if bool(l.item.kind & tok.TokenKind.ID) and l.item.val.upper() in [
-                "PERSISTENT",
-                "STORED",
-                "VIRTUAL",
-            ]:
-                l.forth()
-            generated = True
-        elif l.item is tok.AUTOINCREMENT or l.item is tok.AUTO_INCREMENT:
-            l.forth()
-            autoincrement = True
-        else:
-            constraint = _parse_constraint(l, colname)
-            if isinstance(constraint, sql.Uniqueness) and constraint.is_primary:
-                pk = constraint
-            elif constraint is not None:
-                col_constraints.append(constraint)
-    if pk is not None:
-        if collation is not None:
-            assert len(pk.indexed) == 1, "only one column"
-            pk = dataclasses.replace(
-                pk, indexed=[dataclasses.replace(pk.indexed[0], collation=collation)]
-            )
-        col_constraints.insert(0, pk)
-    return (
-        sql.Column(
-            name=colname,
-            type=coltype,
-            not_null=not_null,
-            not_null_on_conflict=not_null_on_conflict,
-            autoincrement=autoincrement,
-            generated=generated,
-            default=default,
-            collation=collation,
-        ),
-        col_constraints,
-    )
-
-
-def _parse_default(l: Lex, /) -> sql.Default:
-    _expect(l, tok.DEFAULT)
-    if bool(l.item.kind & tok.TokenKind.LITERAL):
-        l.forth()
-    elif l.item is tok.NUM_PLUS or l.item is tok.NUM_MINUS:
-        l.forth()
-        _parse_int(l)
-    elif bool(l.item.kind & tok.TokenKind.ID) and l.next_item is tok.L_PAREN:
-        # function call
-        l.forth()
-        skip_parens(l)
-    elif l.item is tok.L_PAREN:
-        skip_parens(l)
-    else:
-        raise ParserError(f"'{l.item.val}' is not a supported DEFAULT value.")
-    return sql.Default()
+        constraints.append(_parse_col_constraint(l, colname))
+    return sql.Column(name=colname, type=coltype, constraints=constraints)
 
 
 def _parse_table_options(l: Lex, /) -> sql.TableOptions:
@@ -211,54 +118,96 @@ def _parse_type(l: Lex, /) -> sql.Type:
     return sql.Type(name=type_name, params=type_params)
 
 
-def _parse_constraint(l: Lex, col_name: str | None, /) -> sql.Constraint | None:
-    columns = [] if col_name is None else [col_name]
-    indexed: list[sql.Indexed] = []
+def _parse_table_constraint(l: Lex, /) -> sql.TableConstraint:
     name = None
     if l.item is tok.CONSTRAINT:
         l.forth()
-        name = _parse_name(l)  # skip name
-    if l.item is tok.PRIMARY:
+        name = _parse_name(l)
+    if l.item is tok.PRIMARY or l.item is tok.UNIQUE:
+        is_primary = l.item is tok.PRIMARY
         l.forth()
-        _expect(l, tok.KEY)
-        if col_name is None:
-            indexed = _parse_indexed_names(l)
-        else:
-            sorting = _parse_optional_sorting(l)
-            indexed = [sql.Indexed(column=col_name, sorting=sorting)]
-        on_conflict = _parse_on_conflict(l)
+        if is_primary:
+            _expect(l, tok.KEY)
         return sql.Uniqueness(
             name=name,
-            indexed=indexed,
-            is_primary=True,
-            on_conflict=on_conflict,
+            is_table_constraint=True,
+            indexed=_parse_indexed_names(l),
+            is_primary=is_primary,
+            on_conflict=_parse_on_conflict(l),
         )
-    elif l.item is tok.UNIQUE:
-        l.forth()
-        if col_name is None:
-            indexed = _parse_indexed_names(l)
-        else:
-            indexed = [sql.Indexed(column=col_name)]
-        on_conflict = _parse_on_conflict(l)
-        return sql.Uniqueness(name=name, indexed=indexed, on_conflict=on_conflict)
-    elif l.item is tok.CHECK:
-        l.forth()
-        skip_parens(l)
-        return None
-    elif col_name is None and l.item is tok.FOREIGN:
+    elif l.item is tok.FOREIGN:
         l.forth()
         _expect(l, tok.KEY)
         columns = _parse_parens_names(l)
-        return _parse_foreign_key_clause(l, columns, name)
+        return _parse_foreign_key_clause(l, columns, name, is_table_constraint=True)
+    elif l.item is tok.CHECK:
+        l.forth()
+        expr = tokens_in_parens(l)
+        return sql.Check(name=name, is_table_constraint=True, expr=expr)
+    else:
+        raise ParserError(f"'{l.item.val}' cannot start a table constraint")
+
+
+def _parse_col_constraint(l: Lex, col_name: str, /) -> sql.ColumnConstraint:
+    columns = [col_name]
+    name = None
+    if l.item is tok.CONSTRAINT:
+        l.forth()
+        name = _parse_name(l)
+    if l.item is tok.PRIMARY or l.item is tok.UNIQUE:
+        is_primary = l.item is tok.PRIMARY
+        l.forth()
+        if is_primary:
+            _expect(l, tok.KEY)
+        sorting = _parse_optional_sorting(l)
+        indexed = [sql.Indexed(column=col_name, sorting=sorting)]
+        on_conflict = _parse_on_conflict(l)
+        autoincrement = l.item is tok.AUTOINCREMENT or l.item is tok.AUTO_INCREMENT
+        if autoincrement:
+            l.forth()
+        return sql.Uniqueness(
+            name=name,
+            indexed=indexed,
+            is_primary=is_primary,
+            autoincrement=autoincrement,
+            on_conflict=on_conflict,
+        )
+    elif l.item is tok.CHECK:
+        l.forth()
+        expr = tokens_in_parens(l)
+        return sql.Check(name=name, expr=expr)
     elif l.item is tok.REFERENCES:
         return _parse_foreign_key_clause(l, columns, name)
+    elif l.item is tok.NOT:
+        l.forth()
+        _expect(l, tok.NULL)
+        return sql.NotNull(name=name, on_conflict=_parse_on_conflict(l))
+    elif l.item is tok.DEFAULT:
+        l.forth()
+        return sql.Default(name=name, expr=_parse_expr(l))
+    elif l.item is tok.COLLATE:
+        l.forth()
+        return sql.Collation(name=name, value=_parse_name(l))
+    elif l.item is tok.GENERATED or l.item is tok.AS:
+        if l.item is tok.GENERATED and l.next_item is tok.ALWAYS:
+            l.forth()
+            l.forth()
+        elif l.item is tok.GENERATED and l.next_item is tok.BY:
+            l.forth()
+            l.forth()
+            _expect(l, tok.DEFAULT)
+        _expect(l, tok.AS)
+        if l.item is tok.IDENTITY:
+            l.forth()
+        expr = tokens_in_parens(l)
+        kind = None
+        tok_val = l.item.val.upper()
+        if bool(l.item.kind & tok.TokenKind.ID) and tok_val in sql.GENERATED_KIND:
+            kind = sql.GeneratedKind[tok_val]
+            l.forth()
+        return sql.Generated(name=name, expr=expr, kind=kind)
     else:
-        raise ParserError(f"'{l.item.val}' cannot start a constraint")
-
-
-def _parse_collation(l: Lex, /) -> str:
-    _expect(l, tok.COLLATE)
-    return _parse_name(l)
+        raise ParserError(f"'{l.item.val}' cannot start a column constraint")
 
 
 def _parse_indexed_names(l: Lex, /) -> list[sql.Indexed]:
@@ -275,7 +224,8 @@ def _parse_indexed_name(l: Lex, /) -> sql.Indexed:
     column = _parse_name(l)
     collation = None
     if l.item is tok.COLLATE:
-        collation = _parse_collation(l)
+        l.forth()
+        collation = sql.Collation(value=_parse_name(l))
     sorting = _parse_optional_sorting(l)
     return sql.Indexed(column=column, collation=collation, sorting=sorting)
 
@@ -290,6 +240,29 @@ def _parse_optional_sorting(l: Lex, /) -> sql.Sorting | None:
     return None
 
 
+def _parse_expr(l: Lex, /) -> list[tok.Token]:
+    result: list[tok.Token] = []
+    if bool(l.item.kind & tok.TokenKind.LITERAL):
+        result.append(l.item)
+        l.forth()
+    elif l.item is tok.NUM_PLUS or l.item is tok.NUM_MINUS:
+        result += [l.item, l.next_item]
+        l.forth()
+        _parse_int(l)  # ensure it is an integer
+    elif bool(l.item.kind & tok.TokenKind.ID) and l.next_item is tok.L_PAREN:
+        # function call
+        result.append(l.item)
+        l.forth()
+        result.append(tok.L_PAREN)
+        result += tokens_in_parens(l)
+        result.append(tok.R_PAREN)
+    elif l.item is tok.L_PAREN:
+        result += tokens_in_parens(l)
+    else:
+        raise ParserError(f"'{l.item.val}' is not a supported DEFAULT value.")
+    return result
+
+
 def _parse_parens_names(l: Lex, /) -> list[str]:
     _expect(l, tok.L_PAREN)
     result = [_parse_name(l)]
@@ -301,10 +274,15 @@ def _parse_parens_names(l: Lex, /) -> list[str]:
 
 
 def _parse_foreign_key_clause(
-    l: Lex, columns: list[str], name: str | None, /
+    l: Lex,
+    columns: list[str],
+    name: str | None,
+    /,
+    *,
+    is_table_constraint: bool = False,
 ) -> sql.ForeignKey:
     _expect(l, tok.REFERENCES)
-    foreign_table = _parse_qualified_name(l)
+    foreign_table = sql.Alias(name=_parse_qualified_name(l))
     referred_columns: list[str] | None = None
     on_delete: sql.OnUpdateDelete | None = None
     on_update: sql.OnUpdateDelete | None = None
@@ -334,6 +312,7 @@ def _parse_foreign_key_clause(
         columns=columns,
         foreign_table=foreign_table,
         referred_columns=referred_columns,
+        is_table_constraint=is_table_constraint,
         on_delete=on_delete,
         on_update=on_update,
         match=match,
@@ -455,6 +434,21 @@ def skip_parens(l: Lex, /) -> None:
             count -= 1
         l.forth()
     l.forth()
+
+
+def tokens_in_parens(l: Lex, /) -> list[tok.Token]:
+    result: list[tok.Token] = []
+    _expect(l, tok.L_PAREN)
+    count = 0
+    while l.item is not tok.R_PAREN or count > 0:
+        result.append(l.item)
+        if l.item is tok.L_PAREN:
+            count += 1
+        elif l.item is tok.R_PAREN:
+            count -= 1
+        l.forth()
+    l.forth()
+    return result
 
 
 def _expect(l: Lex, tk: tok.Token, /) -> None:

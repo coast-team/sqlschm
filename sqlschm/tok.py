@@ -2,8 +2,13 @@ from dataclasses import dataclass
 from enum import Flag, unique, auto
 
 
+class _ReprFlag(Flag):
+    def __repr__(self) -> str:
+        return f"{type(self).__name__}.{self.name}"
+
+
 @unique
-class TokenKind(Flag):
+class TokenKind(_ReprFlag):
     KEYWORD = auto()
 
     RAW_ID = auto()  # id

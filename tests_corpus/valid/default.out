@@ -1,6 +1,5 @@
 CREATE TABLE "person"(
-    "id" integer,
-    "name" text,
-    "age" integer,
-    PRIMARY KEY ("id")
+    "id" integer PRIMARY KEY,
+    "name" text DEFAULT 'anonymous',
+    "age" integer DEFAULT 0
 );

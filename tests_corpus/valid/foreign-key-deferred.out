@@ -1,6 +1,4 @@
 CREATE TABLE "person"(
-    "fullname" text NOT NULL,
-    "friend" text,
-    PRIMARY KEY ("fullname"),
-    FOREIGN KEY ("friend") REFERENCES "person"("fullname") DEFERRABLE INITIALLY DEFERRED
+    "fullname" text NOT NULL PRIMARY KEY,
+    "friend" text REFERENCES "person"("fullname") DEFERRABLE INITIALLY DEFERRED
 );

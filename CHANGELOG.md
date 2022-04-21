@@ -2,6 +2,12 @@
 
 This project adheres to [Semantic Versioning][semver].
 
+## Unreleased
+
+-   BREAKING CHANGES: Lossless parsing
+
+    The produced AST expose now DEFAULT, GENERATED, and CHECK constraint.
+
 ## 0.4.0 (2022-04-15)
 
 -   Expose foreign keys' match value in the AST

@@ -1,5 +1,4 @@
 CREATE TABLE "person"(
-    "fullname" text NOT NULL AUTOINCREMENT,
-    "birthday" date,
-    PRIMARY KEY ("fullname")
+    "fullname" text NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "birthday" date DEFAULT NULL
 );

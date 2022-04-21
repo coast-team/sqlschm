@@ -1,5 +1,4 @@
 CREATE TABLE "person"(
-    "fullname" NOT NULL COLLATE BINARY,
-    "birthday",
-    PRIMARY KEY ("fullname" COLLATE BINARY ASC)
+    "fullname" NOT NULL PRIMARY KEYASC COLLATE BINARY,
+    "birthday" DEFAULT NULL
 );

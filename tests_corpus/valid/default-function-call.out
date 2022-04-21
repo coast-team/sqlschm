@@ -1,4 +1,3 @@
 CREATE TABLE "person"(
-    "id" integer,
-    PRIMARY KEY ("id")
+    "id" integer DEFAULT next ( seq ) PRIMARY KEY
 );
