@@ -391,9 +391,9 @@ def _parse_on_conflict(l: Lex, /) -> sql.OnConflict | None:
 
 
 def _parse_int(l: Lex, /) -> int:
-    if l.item is not tok.TokenKind.INT:
+    if l.item.kind is not tok.TokenKind.INT:
         raise ParserError("an integer is expected.")
-    result = int(l.item)
+    result = int(l.item.val)
     l.forth()
     return result
 

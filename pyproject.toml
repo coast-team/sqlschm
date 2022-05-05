@@ -17,6 +17,7 @@ python = "^3.10"
 black = "^22.1.0"
 pyright = "^1.1.227"
 pytest = "^7.0.1"
+mypy = "^0.950"
 
 [tool.poetry.scripts]
 corpus = "scripts:main"
@@ -26,4 +27,7 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.pyright]
-reportMissingTypeStubs=true
+reportMissingTypeStubs = true
+
+[tool.mypy]
+strict = true
