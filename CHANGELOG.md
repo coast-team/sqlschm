@@ -2,6 +2,12 @@
 
 This project adheres to [Semantic Versioning][semver].
 
+## Unreleased
+
+-   Add shortcuts to access column names of a uniqueness constraint
+
+-   Add shortcuts to access generated constraint of a column
+
 ## 0.5.0 (2022-04-21)
 
 -   BREAKING CHANGES: Lossless parsing

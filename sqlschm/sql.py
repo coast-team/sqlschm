@@ -128,6 +128,9 @@ class Uniqueness:
     autoincrement: bool = False
     on_conflict: OnConflict | None = None
 
+    def columns(self, /) -> Sequence[str]:
+        return [x.column for x in self.indexed]
+
 
 @dataclass(frozen=True, kw_only=True, slots=True)
 class ForeignKey:
@@ -166,6 +169,9 @@ class Column:
 
     def default(self, /) -> Default | None:
         return next((x for x in self.constraints if isinstance(x, Default)), None)
+
+    def generated(self, /) -> Generated | None:
+        return next((x for x in self.constraints if isinstance(x, Generated)), None)
 
     def not_null(self, /) -> NotNull | None:
         return next((x for x in self.constraints if isinstance(x, NotNull)), None)
