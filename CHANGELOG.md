@@ -2,6 +2,10 @@
 
 This project adheres to [Semantic Versioning][semver].
 
+## Unreleased
+
+-   Allow schemas with empty statements that end with a semicolon
+
 ## 0.6.0 (2022-05-30)
 
 -   Add shortcuts to access column names of a uniqueness constraint

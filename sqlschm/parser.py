@@ -17,6 +17,9 @@ def parse_schema(src: Iterable[str], /) -> sql.Schema:
     l = lexer.ItemCursor(non_trivia_tokens, _EOF_TOKEN)
     tables: list[sql.Table] = []
     while l.item is not _EOF_TOKEN:
+        if l.item is tok.SEMICOLON:
+            l.forth()
+            continue
         tables.append(_parse_create_table(l))
     return sql.Schema(tables=tables)
 
