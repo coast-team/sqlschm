@@ -1,6 +1,6 @@
 from sqlschm import tok
 
 
-def test_interned_consistent_val():
+def test_interned_consistent_val() -> None:
     for val in tok.INTERNED:
         assert tok.INTERNED[val].val == val

@@ -6,7 +6,7 @@ import os
 CORPUS = "tests_corpus/valid/"
 
 
-def test_valid_schema():
+def test_valid_schema() -> None:
     files = list(os.listdir(CORPUS))
     files.sort()
     for schm_name in files:

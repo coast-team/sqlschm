@@ -9,7 +9,7 @@ from pathlib import Path
 CORPUS = "tests_corpus/valid/"
 
 
-def main():
+def main() -> None:
     files = list(os.listdir(CORPUS))
     files.sort()
     for schm_name in files:

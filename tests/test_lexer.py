@@ -2,17 +2,17 @@ from sqlschm import lexer, tok
 from sqlschm.tok import Token, TokenKind
 
 
-def test_newline():
+def test_newline() -> None:
     tks = list(lexer.tokens("\n"))
     assert tks == [tok.NEWLINE]
 
 
-def test_non_newline_spaces():
+def test_non_newline_spaces() -> None:
     tks = list(lexer.tokens("  \t"))
     assert tks == [tok.INTERNED[" "], tok.INTERNED[" "], tok.INTERNED["\t"]]
 
 
-def test_spaces():
+def test_spaces() -> None:
     tks = list(lexer.tokens("\n \n\t"))
     assert tks == [
         tok.NEWLINE,
@@ -22,29 +22,29 @@ def test_spaces():
     ]
 
 
-def test_int():
+def test_int() -> None:
     for x in ["42", "042"]:
         tks = list(lexer.tokens(x))
         assert tks == [Token(TokenKind.INT, x)]
 
 
-def test_hex():
+def test_hex() -> None:
     tks = list(lexer.tokens("0x7f"))
     assert tks == [Token(TokenKind.HEX, "7f")]
 
 
-def test_float():
+def test_float() -> None:
     for x in ["1.0", "0.", ".0", "0.e5", "0.e-5", "0.e+5", ".0e5", "1e-3"]:
         tks = list(lexer.tokens(x))
         assert tks == [Token(TokenKind.FLOAT, x)]
 
 
-def test_binary():
+def test_binary() -> None:
     tks = list(lexer.tokens("b'010'"))
     assert tks == [Token(TokenKind.BINARY, "010")]
 
 
-def test_blob():
+def test_blob() -> None:
     tks = list(lexer.tokens("x'ae5'"))
     assert tks == [Token(TokenKind.BLOB, "ae5")]
 
@@ -52,12 +52,12 @@ def test_blob():
     assert tks == [Token(TokenKind.BLOB, "ae5")]
 
 
-def test_raw_id():
+def test_raw_id() -> None:
     tks = list(lexer.tokens("id"))
     assert tks == [Token(TokenKind.RAW_ID, "id")]
 
 
-def test_enclosed_id():
+def test_enclosed_id() -> None:
     tks = list(lexer.tokens("[create]"))
     assert tks == [Token(TokenKind.NON_STD_DELIMITED_ID, "create")]
 
@@ -65,18 +65,18 @@ def test_enclosed_id():
     assert tks == [Token(TokenKind.NON_STD_DELIMITED_ID, "create")]
 
 
-def test_interned():
+def test_interned() -> None:
     for x in tok.INTERNED:
         tks = list(lexer.tokens(x))
         assert tks == [tok.INTERNED[x]]
 
 
-def test_str():
+def test_str() -> None:
     tks = list(lexer.tokens("'a string'"))
     assert tks == [Token(TokenKind.STD_STR, "a string")]
 
 
-def test_delimited_id():
+def test_delimited_id() -> None:
     tks = list(lexer.tokens('"a id"'))
     assert tks == [Token(TokenKind.STD_DELIMITED_ID, "a id")]
 
@@ -87,24 +87,24 @@ def test_delimited_id():
     assert tks == [Token(TokenKind.STD_DELIMITED_ID, 'a "quoted" id')]
 
 
-def test_single_line_comment():
+def test_single_line_comment() -> None:
     tks = list(lexer.tokens("-- a comment\n"))
     assert tks == [Token(TokenKind.SINGLE_LINE_COMMENT, " a comment")]
 
 
-def test_multi_line_comment():
+def test_multi_line_comment() -> None:
     tks = list(lexer.tokens("/* a comment\n\n on several lines */"))
     assert tks == [
         Token(TokenKind.MULTI_LINE_COMMENT, " a comment\n\n on several lines ")
     ]
 
 
-def test_identifier():
+def test_identifier() -> None:
     tks = list(lexer.tokens("table_1"))
     assert tks == [Token(TokenKind.RAW_ID, "table_1")]
 
 
-def test_unknown():
+def test_unknown() -> None:
     tks = list(lexer.tokens("@"))
     assert tks == [Token(TokenKind.UNKNOWN, "@")]
 
@@ -115,7 +115,7 @@ def test_unknown():
     assert tks == [Token(TokenKind.UNKNOWN, "/* an unterminated comment")]
 
 
-def test_complex():
+def test_complex() -> None:
     schm = "CREATE TABLE table_name(\ncol int DEFAULT 1-- comment\n);"
     tks = list(lexer.tokens(schm))
     assert tks == [
