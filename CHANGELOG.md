@@ -2,7 +2,7 @@
 
 This project adheres to [Semantic Versioning][semver].
 
-## Unreleased
+## 0.6.1 (2022-09-29)
 
 -   Allow schemas with empty statements that end with a semicolon
 
