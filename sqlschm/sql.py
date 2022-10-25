@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from enum import Enum, auto
-from collections.abc import Sequence
 from sqlschm import tok
 from typing import Iterable
 import itertools
@@ -67,7 +66,7 @@ GENERATED_KIND: frozenset[str] = frozenset(member.name for member in GeneratedKi
 From the most specific to the least specific.
 e.g. database.schema.table is represented as ("table", "schema", "database")
 """
-QualifiedName = Sequence[str]
+QualifiedName = tuple[str, ...]
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
@@ -78,7 +77,7 @@ class Alias:
 @dataclass(frozen=True, kw_only=True, slots=True)
 class Type:
     name: str
-    params: Sequence[int] = tuple()
+    params: tuple[int, ...] = tuple()
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
@@ -96,7 +95,7 @@ class Collation:
 @dataclass(frozen=True, kw_only=True, slots=True)
 class Default:
     name: str | None = None
-    expr: Sequence[tok.Token]
+    expr: tuple[tok.Token, ...]
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
@@ -108,7 +107,7 @@ class NotNull:
 @dataclass(frozen=True, kw_only=True, slots=True)
 class Generated:
     name: str | None = None
-    expr: Sequence[tok.Token]
+    expr: tuple[tok.Token, ...]
     kind: GeneratedKind | None = None
 
 
@@ -123,22 +122,22 @@ class Indexed:
 class Uniqueness:
     name: str | None = None
     is_table_constraint: bool = False
-    indexed: Sequence[Indexed]
+    indexed: tuple[Indexed, ...]
     is_primary: bool = False
     autoincrement: bool = False
     on_conflict: OnConflict | None = None
 
-    def columns(self, /) -> Sequence[str]:
-        return [x.column for x in self.indexed]
+    def columns(self, /) -> Iterable[str]:
+        return (x.column for x in self.indexed)
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
 class ForeignKey:
     name: str | None = None
     is_table_constraint: bool = False
-    columns: Sequence[str]
+    columns: tuple[str, ...]
     foreign_table: Alias
-    referred_columns: Sequence[str] | None
+    referred_columns: tuple[str, ...] | None
     on_delete: OnUpdateDelete | None = None
     on_update: OnUpdateDelete | None = None
     match: Match | None = None
@@ -149,7 +148,7 @@ class ForeignKey:
 class Check:
     name: str | None = None
     is_table_constraint: bool = False
-    expr: Sequence[tok.Token]
+    expr: tuple[tok.Token, ...]
 
 
 TableConstraint = Uniqueness | ForeignKey | Check
@@ -162,7 +161,7 @@ ColumnConstraint = TableConstraint | Collation | Default | NotNull | Generated
 class Column:
     name: str
     type: Type
-    constraints: Sequence[ColumnConstraint]
+    constraints: tuple[ColumnConstraint, ...]
 
     def collation(self, /) -> Collation | None:
         return next((x for x in self.constraints if isinstance(x, Collation)), None)
@@ -195,8 +194,8 @@ class TableOptions:
 @dataclass(frozen=True, kw_only=True, slots=True)
 class Table:
     name: QualifiedName
-    columns: Sequence[Column]
-    constraints: Sequence[TableConstraint]
+    columns: tuple[Column, ...]
+    constraints: tuple[TableConstraint, ...]
     options: TableOptions = TableOptions()
     if_not_exists: bool = False
     or_replace: bool = False
@@ -221,26 +220,26 @@ class Table:
             None,
         )
 
-    def uniqueness(self, /) -> list[Uniqueness]:
+    def uniqueness(self, /) -> Iterable[Uniqueness]:
         """All uniqueness constraints, including the primary key"""
-        return [x for x in self.all_constraints() if isinstance(x, Uniqueness)]
+        return (x for x in self.all_constraints() if isinstance(x, Uniqueness))
 
-    def foreign_keys(self, /) -> list[ForeignKey]:
+    def foreign_keys(self, /) -> Iterable[ForeignKey]:
         """All foreign key constraints"""
-        return [x for x in self.all_constraints() if isinstance(x, ForeignKey)]
+        return (x for x in self.all_constraints() if isinstance(x, ForeignKey))
 
-    def checks(self, /) -> list[Check]:
+    def checks(self, /) -> Iterable[Check]:
         """All foreign key constraints"""
-        return [x for x in self.all_constraints() if isinstance(x, Check)]
+        return (x for x in self.all_constraints() if isinstance(x, Check))
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
 class Schema:
-    tables: Sequence[Table]
+    tables: tuple[Table, ...]
 
 
 Symbols = dict[str, Table]
 
 
 def symbols(schema: Schema, /) -> Symbols:
-    return dict((tbl.name[0], tbl) for tbl in schema.tables)
+    return {tbl.name[0]: tbl for tbl in schema.tables}

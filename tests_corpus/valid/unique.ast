@@ -1,76 +1,76 @@
 Schema(
-    tables=[
+    tables=(
         Table(
-            name=["contacts"],
-            columns=[
+            name=("contacts",),
+            columns=(
                 Column(
                     name="contact_id",
-                    type=Type(name="INTEGER", params=[]),
-                    constraints=[
+                    type=Type(name="INTEGER", params=()),
+                    constraints=(
                         Uniqueness(
                             name=None,
                             is_table_constraint=False,
-                            indexed=[
+                            indexed=(
                                 Indexed(
                                     column="contact_id", collation=None, sorting=None
-                                )
-                            ],
+                                ),
+                            ),
                             is_primary=True,
                             autoincrement=False,
                             on_conflict=None,
-                        )
-                    ],
+                        ),
+                    ),
                 ),
                 Column(
                     name="first_name",
-                    type=Type(name="TEXT", params=[]),
-                    constraints=[NotNull(name=None, on_conflict=None)],
+                    type=Type(name="TEXT", params=()),
+                    constraints=(NotNull(name=None, on_conflict=None),),
                 ),
                 Column(
                     name="last_name",
-                    type=Type(name="TEXT", params=[]),
-                    constraints=[NotNull(name=None, on_conflict=None)],
+                    type=Type(name="TEXT", params=()),
+                    constraints=(NotNull(name=None, on_conflict=None),),
                 ),
                 Column(
                     name="email",
-                    type=Type(name="TEXT", params=[]),
-                    constraints=[
+                    type=Type(name="TEXT", params=()),
+                    constraints=(
                         NotNull(name=None, on_conflict=None),
                         Uniqueness(
                             name=None,
                             is_table_constraint=False,
-                            indexed=[
-                                Indexed(column="email", collation=None, sorting=None)
-                            ],
+                            indexed=(
+                                Indexed(column="email", collation=None, sorting=None),
+                            ),
                             is_primary=False,
                             autoincrement=False,
                             on_conflict=OnConflict.IGNORE,
                         ),
-                    ],
+                    ),
                 ),
                 Column(
                     name="phone",
-                    type=Type(name="TEXT", params=[]),
-                    constraints=[
+                    type=Type(name="TEXT", params=()),
+                    constraints=(
                         NotNull(name=None, on_conflict=None),
                         Uniqueness(
                             name=None,
                             is_table_constraint=False,
-                            indexed=[
-                                Indexed(column="phone", collation=None, sorting=None)
-                            ],
+                            indexed=(
+                                Indexed(column="phone", collation=None, sorting=None),
+                            ),
                             is_primary=False,
                             autoincrement=False,
                             on_conflict=None,
                         ),
-                    ],
+                    ),
                 ),
-            ],
-            constraints=[],
+            ),
+            constraints=(),
             options=TableOptions(strict=False, without_rowid=False),
             if_not_exists=False,
             or_replace=False,
             temporary=False,
-        )
-    ]
+        ),
+    )
 )

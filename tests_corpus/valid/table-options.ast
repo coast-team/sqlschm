@@ -1,17 +1,17 @@
 Schema(
-    tables=[
+    tables=(
         Table(
-            name=["person"],
-            columns=[
+            name=("person",),
+            columns=(
                 Column(
-                    name="fullname", type=Type(name="TEXT", params=[]), constraints=[]
-                )
-            ],
-            constraints=[],
+                    name="fullname", type=Type(name="TEXT", params=()), constraints=()
+                ),
+            ),
+            constraints=(),
             options=TableOptions(strict=True, without_rowid=True),
             if_not_exists=False,
             or_replace=False,
             temporary=False,
-        )
-    ]
+        ),
+    )
 )

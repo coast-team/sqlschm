@@ -21,7 +21,7 @@ def parse_schema(src: Iterable[str], /) -> sql.Schema:
             l.forth()
             continue
         tables.append(_parse_create_table(l))
-    return sql.Schema(tables=tables)
+    return sql.Schema(tables=tuple(tables))
 
 
 def _parse_create_table(l: Lex, /) -> sql.Table:
@@ -69,8 +69,8 @@ def _parse_create_table(l: Lex, /) -> sql.Table:
         if_not_exists=if_not_exists,
         or_replace=or_replace,
         temporary=temporary,
-        columns=columns,
-        constraints=constraints,
+        columns=tuple(columns),
+        constraints=tuple(constraints),
         options=options,
     )
 
@@ -81,7 +81,7 @@ def _parse_column_def(l: Lex, /) -> sql.Column:
     constraints: list[sql.ColumnConstraint] = []
     while l.item is not tok.COMMA and l.item is not tok.R_PAREN:
         constraints.append(_parse_col_constraint(l, colname))
-    return sql.Column(name=colname, type=coltype, constraints=constraints)
+    return sql.Column(name=colname, type=coltype, constraints=tuple(constraints))
 
 
 def _parse_table_options(l: Lex, /) -> sql.TableOptions:
@@ -118,7 +118,7 @@ def _parse_type(l: Lex, /) -> sql.Type:
             if l.item is tok.COMMA:
                 type_params.append(_parse_int(l))
             _expect(l, tok.R_PAREN)
-    return sql.Type(name=type_name, params=type_params)
+    return sql.Type(name=type_name, params=tuple(type_params))
 
 
 def _parse_table_constraint(l: Lex, /) -> sql.TableConstraint:
@@ -152,7 +152,6 @@ def _parse_table_constraint(l: Lex, /) -> sql.TableConstraint:
 
 
 def _parse_col_constraint(l: Lex, col_name: str, /) -> sql.ColumnConstraint:
-    columns = [col_name]
     name = None
     if l.item is tok.CONSTRAINT:
         l.forth()
@@ -163,7 +162,7 @@ def _parse_col_constraint(l: Lex, col_name: str, /) -> sql.ColumnConstraint:
         if is_primary:
             _expect(l, tok.KEY)
         sorting = _parse_optional_sorting(l)
-        indexed = [sql.Indexed(column=col_name, sorting=sorting)]
+        indexed = (sql.Indexed(column=col_name, sorting=sorting),)
         on_conflict = _parse_on_conflict(l)
         autoincrement = l.item is tok.AUTOINCREMENT or l.item is tok.AUTO_INCREMENT
         if autoincrement:
@@ -180,7 +179,7 @@ def _parse_col_constraint(l: Lex, col_name: str, /) -> sql.ColumnConstraint:
         expr = tokens_in_parens(l)
         return sql.Check(name=name, expr=expr)
     elif l.item is tok.REFERENCES:
-        return _parse_foreign_key_clause(l, columns, name)
+        return _parse_foreign_key_clause(l, (col_name,), name)
     elif l.item is tok.NOT:
         l.forth()
         _expect(l, tok.NULL)
@@ -213,14 +212,14 @@ def _parse_col_constraint(l: Lex, col_name: str, /) -> sql.ColumnConstraint:
         raise ParserError(f"'{l.item.val}' cannot start a column constraint")
 
 
-def _parse_indexed_names(l: Lex, /) -> list[sql.Indexed]:
+def _parse_indexed_names(l: Lex, /) -> tuple[sql.Indexed, ...]:
     _expect(l, tok.L_PAREN)
     result = [_parse_indexed_name(l)]
     while l.item is tok.COMMA:
         l.forth()
         result.append(_parse_indexed_name(l))
     _expect(l, tok.R_PAREN)
-    return result
+    return tuple(result)
 
 
 def _parse_indexed_name(l: Lex, /) -> sql.Indexed:
@@ -243,7 +242,7 @@ def _parse_optional_sorting(l: Lex, /) -> sql.Sorting | None:
     return None
 
 
-def _parse_expr(l: Lex, /) -> list[tok.Token]:
+def _parse_expr(l: Lex, /) -> tuple[tok.Token, ...]:
     result: list[tok.Token] = []
     if bool(l.item.kind & tok.TokenKind.LITERAL):
         result.append(l.item)
@@ -263,22 +262,22 @@ def _parse_expr(l: Lex, /) -> list[tok.Token]:
         result += tokens_in_parens(l)
     else:
         raise ParserError(f"'{l.item.val}' is not a supported DEFAULT value.")
-    return result
+    return tuple(result)
 
 
-def _parse_parens_names(l: Lex, /) -> list[str]:
+def _parse_parens_names(l: Lex, /) -> tuple[str, ...]:
     _expect(l, tok.L_PAREN)
     result = [_parse_name(l)]
     while l.item is tok.COMMA:
         l.forth()
         result.append(_parse_name(l))
     _expect(l, tok.R_PAREN)
-    return result
+    return tuple(result)
 
 
 def _parse_foreign_key_clause(
     l: Lex,
-    columns: list[str],
+    columns: tuple[str, ...],
     name: str | None,
     /,
     *,
@@ -286,7 +285,7 @@ def _parse_foreign_key_clause(
 ) -> sql.ForeignKey:
     _expect(l, tok.REFERENCES)
     foreign_table = sql.Alias(name=_parse_qualified_name(l))
-    referred_columns: list[str] | None = None
+    referred_columns: tuple[str, ...] | None = None
     on_delete: sql.OnUpdateDelete | None = None
     on_update: sql.OnUpdateDelete | None = None
     match: sql.Match | None = None
@@ -407,7 +406,7 @@ def _parse_qualified_name(l: Lex, /) -> sql.QualifiedName:
         l.forth()
         names.append(_parse_name(l))
     names.reverse()
-    return names
+    return tuple(names)
 
 
 def _parse_name(l: Lex, /) -> str:
@@ -439,7 +438,7 @@ def skip_parens(l: Lex, /) -> None:
     l.forth()
 
 
-def tokens_in_parens(l: Lex, /) -> list[tok.Token]:
+def tokens_in_parens(l: Lex, /) -> tuple[tok.Token, ...]:
     result: list[tok.Token] = []
     _expect(l, tok.L_PAREN)
     count = 0
@@ -451,7 +450,7 @@ def tokens_in_parens(l: Lex, /) -> list[tok.Token]:
             count -= 1
         l.forth()
     l.forth()
-    return result
+    return tuple(result)
 
 
 def _expect(l: Lex, tk: tok.Token, /) -> None:

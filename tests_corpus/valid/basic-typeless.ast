@@ -1,41 +1,43 @@
 Schema(
-    tables=[
+    tables=(
         Table(
-            name=["person"],
-            columns=[
+            name=("person",),
+            columns=(
                 Column(
                     name="fullname",
-                    type=Type(name="", params=[]),
-                    constraints=[
+                    type=Type(name="", params=()),
+                    constraints=(
                         NotNull(name=None, on_conflict=None),
                         Uniqueness(
                             name=None,
                             is_table_constraint=False,
-                            indexed=[
-                                Indexed(column="fullname", collation=None, sorting=None)
-                            ],
+                            indexed=(
+                                Indexed(
+                                    column="fullname", collation=None, sorting=None
+                                ),
+                            ),
                             is_primary=True,
                             autoincrement=False,
                             on_conflict=None,
                         ),
-                    ],
+                    ),
                 ),
                 Column(
                     name="birthday",
-                    type=Type(name="", params=[]),
-                    constraints=[
+                    type=Type(name="", params=()),
+                    constraints=(
                         Default(
                             name=None,
-                            expr=[Token(kind=TokenKind.KEYWORD_LITERAL, val="NULL")],
-                        )
-                    ],
+                            expr=(Token(kind=TokenKind.KEYWORD_LITERAL, val="NULL"),),
+                        ),
+                    ),
                 ),
-            ],
-            constraints=[],
+            ),
+            constraints=(),
             options=TableOptions(strict=False, without_rowid=False),
             if_not_exists=False,
             or_replace=False,
             temporary=False,
-        )
-    ]
+        ),
+    )
 )

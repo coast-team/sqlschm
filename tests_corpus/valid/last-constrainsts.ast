@@ -1,22 +1,22 @@
 Schema(
-    tables=[
+    tables=(
         Table(
-            name=["person"],
-            columns=[
+            name=("person",),
+            columns=(
                 Column(
                     name="fullname",
-                    type=Type(name="TEXT", params=[]),
-                    constraints=[NotNull(name=None, on_conflict=None)],
+                    type=Type(name="TEXT", params=()),
+                    constraints=(NotNull(name=None, on_conflict=None),),
                 ),
                 Column(
-                    name="friend", type=Type(name="TEXT", params=[]), constraints=[]
+                    name="friend", type=Type(name="TEXT", params=()), constraints=()
                 ),
-            ],
-            constraints=[
+            ),
+            constraints=(
                 Uniqueness(
                     name=None,
                     is_table_constraint=True,
-                    indexed=[Indexed(column="fullname", collation=None, sorting=None)],
+                    indexed=(Indexed(column="fullname", collation=None, sorting=None),),
                     is_primary=True,
                     autoincrement=False,
                     on_conflict=None,
@@ -24,19 +24,19 @@ Schema(
                 ForeignKey(
                     name=None,
                     is_table_constraint=True,
-                    columns=["friend"],
-                    foreign_table=Alias(name=["person"]),
-                    referred_columns=["fullname"],
+                    columns=("friend",),
+                    foreign_table=Alias(name=("person",)),
+                    referred_columns=("fullname",),
                     on_delete=None,
                     on_update=None,
                     match=None,
                     enforcement=None,
                 ),
-            ],
+            ),
             options=TableOptions(strict=False, without_rowid=False),
             if_not_exists=False,
             or_replace=False,
             temporary=False,
-        )
-    ]
+        ),
+    )
 )

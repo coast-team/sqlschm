@@ -1,31 +1,31 @@
 Schema(
-    tables=[
+    tables=(
         Table(
-            name=["person"],
-            columns=[
+            name=("person",),
+            columns=(
                 Column(
                     name="id",
-                    type=Type(name="INTEGER", params=[]),
-                    constraints=[
+                    type=Type(name="INTEGER", params=()),
+                    constraints=(
                         NotNull(name=None, on_conflict=None),
                         Uniqueness(
                             name=None,
                             is_table_constraint=False,
-                            indexed=[
-                                Indexed(column="id", collation=None, sorting=None)
-                            ],
+                            indexed=(
+                                Indexed(column="id", collation=None, sorting=None),
+                            ),
                             is_primary=True,
                             autoincrement=False,
                             on_conflict=None,
                         ),
-                    ],
-                )
-            ],
-            constraints=[],
+                    ),
+                ),
+            ),
+            constraints=(),
             options=TableOptions(strict=False, without_rowid=False),
             if_not_exists=False,
             or_replace=False,
             temporary=False,
-        )
-    ]
+        ),
+    )
 )

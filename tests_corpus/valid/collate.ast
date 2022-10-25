@@ -1,19 +1,19 @@
 Schema(
-    tables=[
+    tables=(
         Table(
-            name=["person"],
-            columns=[
+            name=("person",),
+            columns=(
                 Column(
                     name="fullname",
-                    type=Type(name="TEXT", params=[]),
-                    constraints=[Collation(name=None, value="NOCASE")],
-                )
-            ],
-            constraints=[],
+                    type=Type(name="TEXT", params=()),
+                    constraints=(Collation(name=None, value="NOCASE"),),
+                ),
+            ),
+            constraints=(),
             options=TableOptions(strict=False, without_rowid=False),
             if_not_exists=False,
             or_replace=False,
             temporary=False,
-        )
-    ]
+        ),
+    )
 )

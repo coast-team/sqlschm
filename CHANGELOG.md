@@ -2,6 +2,16 @@
 
 This project adheres to [Semantic Versioning][semver].
 
+## Unreleased
+
+-   BREAKING CHANGES: use tuples instead of Sequence abstraction
+
+    This has the advantage to make every object hashable.
+
+-   BREAKING CHANGES: use iterables instead of lists in method return type
+
+    This uniformizes the API and avoids some memory allocation
+
 ## 0.6.1 (2022-09-29)
 
 -   Allow schemas with empty statements that end with a semicolon

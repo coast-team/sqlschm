@@ -1,27 +1,27 @@
 Schema(
-    tables=[
+    tables=(
         Table(
-            name=["contact_groups"],
-            columns=[
+            name=("contact_groups",),
+            columns=(
                 Column(
                     name="contact_id",
-                    type=Type(name="INTEGER", params=[]),
-                    constraints=[],
+                    type=Type(name="INTEGER", params=()),
+                    constraints=(),
                 ),
                 Column(
                     name="group_id",
-                    type=Type(name="INTEGER", params=[]),
-                    constraints=[],
+                    type=Type(name="INTEGER", params=()),
+                    constraints=(),
                 ),
-            ],
-            constraints=[
+            ),
+            constraints=(
                 Uniqueness(
                     name=None,
                     is_table_constraint=True,
-                    indexed=[
+                    indexed=(
                         Indexed(column="contact_id", collation=None, sorting=None),
                         Indexed(column="group_id", collation=None, sorting=None),
-                    ],
+                    ),
                     is_primary=True,
                     autoincrement=False,
                     on_conflict=None,
@@ -29,9 +29,9 @@ Schema(
                 ForeignKey(
                     name=None,
                     is_table_constraint=True,
-                    columns=["contact_id"],
-                    foreign_table=Alias(name=["contacts"]),
-                    referred_columns=["contact_id"],
+                    columns=("contact_id",),
+                    foreign_table=Alias(name=("contacts",)),
+                    referred_columns=("contact_id",),
                     on_delete=OnUpdateDelete.CASCADE,
                     on_update=OnUpdateDelete.NO_ACTION,
                     match=None,
@@ -40,73 +40,75 @@ Schema(
                 ForeignKey(
                     name=None,
                     is_table_constraint=True,
-                    columns=["group_id"],
-                    foreign_table=Alias(name=["GROUPS"]),
-                    referred_columns=["group_id"],
+                    columns=("group_id",),
+                    foreign_table=Alias(name=("GROUPS",)),
+                    referred_columns=("group_id",),
                     on_delete=OnUpdateDelete.CASCADE,
                     on_update=OnUpdateDelete.NO_ACTION,
                     match=None,
                     enforcement=None,
                 ),
-            ],
+            ),
             options=TableOptions(strict=False, without_rowid=False),
             if_not_exists=False,
             or_replace=False,
             temporary=False,
         ),
         Table(
-            name=["contacts"],
-            columns=[
+            name=("contacts",),
+            columns=(
                 Column(
                     name="contact_id",
-                    type=Type(name="INTEGER", params=[]),
-                    constraints=[
+                    type=Type(name="INTEGER", params=()),
+                    constraints=(
                         Uniqueness(
                             name=None,
                             is_table_constraint=False,
-                            indexed=[
+                            indexed=(
                                 Indexed(
                                     column="contact_id", collation=None, sorting=None
-                                )
-                            ],
+                                ),
+                            ),
                             is_primary=True,
                             autoincrement=False,
                             on_conflict=None,
-                        )
-                    ],
-                )
-            ],
-            constraints=[],
+                        ),
+                    ),
+                ),
+            ),
+            constraints=(),
             options=TableOptions(strict=False, without_rowid=False),
             if_not_exists=False,
             or_replace=False,
             temporary=False,
         ),
         Table(
-            name=["GROUPS"],
-            columns=[
+            name=("GROUPS",),
+            columns=(
                 Column(
                     name="group_id",
-                    type=Type(name="INTEGER", params=[]),
-                    constraints=[
+                    type=Type(name="INTEGER", params=()),
+                    constraints=(
                         Uniqueness(
                             name=None,
                             is_table_constraint=False,
-                            indexed=[
-                                Indexed(column="group_id", collation=None, sorting=None)
-                            ],
+                            indexed=(
+                                Indexed(
+                                    column="group_id", collation=None, sorting=None
+                                ),
+                            ),
                             is_primary=True,
                             autoincrement=False,
                             on_conflict=None,
-                        )
-                    ],
-                )
-            ],
-            constraints=[],
+                        ),
+                    ),
+                ),
+            ),
+            constraints=(),
             options=TableOptions(strict=False, without_rowid=False),
             if_not_exists=False,
             or_replace=False,
             temporary=False,
         ),
-    ]
+    )
 )

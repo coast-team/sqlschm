@@ -1,48 +1,48 @@
 Schema(
-    tables=[
+    tables=(
         Table(
-            name=["team"],
-            columns=[
+            name=("team",),
+            columns=(
                 Column(
                     name="name",
-                    type=Type(name="TEXT", params=[]),
-                    constraints=[
+                    type=Type(name="TEXT", params=()),
+                    constraints=(
                         NotNull(name=None, on_conflict=None),
                         Uniqueness(
                             name=None,
                             is_table_constraint=False,
-                            indexed=[
-                                Indexed(column="name", collation=None, sorting=None)
-                            ],
+                            indexed=(
+                                Indexed(column="name", collation=None, sorting=None),
+                            ),
                             is_primary=True,
                             autoincrement=False,
                             on_conflict=None,
                         ),
-                    ],
+                    ),
                 ),
                 Column(
                     name="captain",
-                    type=Type(name="", params=[]),
-                    constraints=[
+                    type=Type(name="", params=()),
+                    constraints=(
                         ForeignKey(
                             name=None,
                             is_table_constraint=False,
-                            columns=["captain"],
-                            foreign_table=Alias(name=["person"]),
-                            referred_columns=["fullname"],
+                            columns=("captain",),
+                            foreign_table=Alias(name=("person",)),
+                            referred_columns=("fullname",),
                             on_delete=OnUpdateDelete.SET_NULL,
                             on_update=OnUpdateDelete.CASCADE,
                             match=None,
                             enforcement=None,
-                        )
-                    ],
+                        ),
+                    ),
                 ),
-            ],
-            constraints=[],
+            ),
+            constraints=(),
             options=TableOptions(strict=False, without_rowid=False),
             if_not_exists=False,
             or_replace=False,
             temporary=False,
-        )
-    ]
+        ),
+    )
 )
