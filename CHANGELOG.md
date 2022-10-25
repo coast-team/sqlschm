@@ -2,7 +2,7 @@
 
 This project adheres to [Semantic Versioning][semver].
 
-## Unreleased
+## 0.7.0 (2022-10-25)
 
 -   BREAKING CHANGES: use tuples instead of Sequence abstraction
 

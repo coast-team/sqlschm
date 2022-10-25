@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "sqlschm"
-version = "0.6.1"
+version = "0.7.0"
 description = "A SQLite Schema parser"
 authors = ["Victorien Elvinger <victorien.elvinger@inria.fr>"]
 license = "Apache-2.0"
