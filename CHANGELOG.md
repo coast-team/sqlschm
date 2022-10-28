@@ -2,7 +2,7 @@
 
 This project adheres to [Semantic Versioning][semver].
 
-## Unreleased
+## 0.8.0 (2022-10-28)
 
 -   BREAKING CHANGES: support for indexes
 
