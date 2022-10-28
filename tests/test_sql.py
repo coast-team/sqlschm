@@ -44,7 +44,7 @@ SYMBOLS = {
     "C": TABLE_C,
     "D": TABLE_D,
 }
-SCHEMA = sql.Schema(tables=(TABLE_A, TABLE_B, TABLE_C, TABLE_D))
+SCHEMA = sql.Schema(items=(TABLE_A, TABLE_B, TABLE_C, TABLE_D))
 
 
 def test_symbols() -> None:

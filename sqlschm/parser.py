@@ -15,13 +15,51 @@ _EOF_TOKEN: tok.Token = tok.Token(tok.TokenKind.UNKNOWN, "")
 def parse_schema(src: Iterable[str], /) -> sql.Schema:
     non_trivia_tokens = filter(tok.is_not_trivia, lexer.tokens(src))
     l = lexer.ItemCursor(non_trivia_tokens, _EOF_TOKEN)
-    tables: list[sql.Table] = []
+    tables: list[sql.SchemaItem] = []
     while l.item is not _EOF_TOKEN:
         if l.item is tok.SEMICOLON:
             l.forth()
             continue
-        tables.append(_parse_create_table(l))
-    return sql.Schema(tables=tuple(tables))
+        tables.append(_parse_create_statement(l))
+    return sql.Schema(items=tuple(tables))
+
+
+def _parse_create_statement(l: Lex, /) -> sql.Table | sql.Index:
+    if l.item is tok.CREATE and (l.next_item is tok.UNIQUE or l.next_item is tok.INDEX):
+        return _parse_create_index(l)
+    return _parse_create_table(l)
+
+
+def _parse_create_index(l: Lex, /) -> sql.Index:
+    if_not_exists = False
+    unique = False
+    _expect(l, tok.CREATE)
+    if l.item is tok.UNIQUE:
+        l.forth()
+        unique = True
+    _expect(l, tok.INDEX)
+    if l.item is tok.IF:
+        l.forth()
+        _expect(l, tok.NOT)
+        _expect(l, tok.EXISTS)
+        if_not_exists = True
+    index_name = _parse_qualified_name(l)
+    _expect(l, tok.ON)
+    table_name = _parse_name(l)
+    indexed = _parse_indexed_names(l)
+    expr = None
+    if l.item is tok.WHERE:
+        l.forth()
+        expr = _tokens_until_semicolon(l)
+    _expect(l, tok.SEMICOLON)
+    return sql.Index(
+        name=index_name,
+        table=table_name,
+        indexed=indexed,
+        where=expr,
+        if_not_exists=if_not_exists,
+        unique=unique,
+    )
 
 
 def _parse_create_table(l: Lex, /) -> sql.Table:
@@ -450,6 +488,14 @@ def tokens_in_parens(l: Lex, /) -> tuple[tok.Token, ...]:
             count -= 1
         l.forth()
     l.forth()
+    return tuple(result)
+
+
+def _tokens_until_semicolon(l: Lex, /) -> tuple[tok.Token, ...]:
+    result: list[tok.Token] = []
+    while l.item is not tok.SEMICOLON:
+        result.append(l.item)
+        l.forth()
     return tuple(result)
 
 

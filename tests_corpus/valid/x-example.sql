@@ -12,6 +12,8 @@ CREATE TABLE contact_groups(
          ON UPDATE NO ACTION
 );
 
+CREATE UNIQUE INDEX contact_groups_group_index ON contact_groups(group_id);
+
 CREATE TABLE contacts(
    contact_id INTEGER PRIMARY KEY
 );

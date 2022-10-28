@@ -1,5 +1,5 @@
 Schema(
-    tables=(
+    items=(
         Table(
             name=("person",),
             columns=(

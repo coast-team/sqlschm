@@ -1,0 +1,16 @@
+Schema(
+    items=(
+        Index(
+            name=("person_major_index",),
+            table="person",
+            indexed=(Indexed(column="age", collation=None, sorting=None),),
+            where=(
+                Token(kind=TokenKind.RAW_ID, val="major"),
+                Token(kind=TokenKind.CMP_OP, val=">"),
+                Token(kind=TokenKind.INT, val="18"),
+            ),
+            if_not_exists=False,
+            unique=False,
+        ),
+    )
+)

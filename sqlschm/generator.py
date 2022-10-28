@@ -1,13 +1,29 @@
-from collections.abc import Sequence
+from typing import Iterable
 import textwrap
 from sqlschm import sql, tok
 
 
 def generate_schema(schema: sql.Schema, dialect: sql.Dialect, /) -> str:
     result = ""
-    for table in schema.tables:
-        result += _generate_create_table(table)
+    for item in schema.items:
+        if isinstance(item, sql.Table):
+            result += _generate_create_table(item)
+        else:
+            result += _generate_create_index(item)
     return result.strip()
+
+
+def _generate_create_index(index: sql.Index, /) -> str:
+    index_name = _generate_qualified_name(index.name)
+    unique = " UNIQUE" if index.unique else ""
+    if_not_exists = " IF NOT EXISTS" if index.if_not_exists else ""
+    idxs = ", ".join(_generate_indexed(idx) for idx in index.indexed)
+    where = f" WHERE {_generate_tokens(index.where)}" if index.where is not None else ""
+    return textwrap.dedent(
+        f"""
+        CREATE{unique} INDEX{if_not_exists} {index_name} ON "{index.table}"({idxs}){where};
+        """
+    )
 
 
 def _generate_create_table(table: sql.Table, /) -> str:
@@ -55,19 +71,19 @@ def _generate_column_constraint(constraint: sql.ColumnConstraint, /) -> str:
         fk_clause = _generate_foreign_key_clause(constraint)
         return f"{name} {fk_clause}"
     elif isinstance(constraint, sql.Check):
-        expr = _generate_expr(constraint.expr)
+        expr = _generate_tokens(constraint.expr)
         return f"{name} CHECK ({expr})"
     elif isinstance(constraint, sql.NotNull):
         on_conflict = _generate_on_conflict(constraint.on_conflict)
         return f"{name} NOT NULL{on_conflict}"
     elif isinstance(constraint, sql.Default):
-        expr = _generate_expr(constraint.expr)
+        expr = _generate_tokens(constraint.expr)
         return f"{name} DEFAULT {expr}"
     elif isinstance(constraint, sql.Collation):
         return f"{name} COLLATE {constraint.value}"
     else:
         kind = f" {constraint.kind.name}" if constraint.kind is not None else ""
-        expr = _generate_expr(constraint.expr)
+        expr = _generate_tokens(constraint.expr)
         return f"{name} GENERATED ALWAYS AS ({expr}){kind}"
 
 
@@ -84,7 +100,7 @@ def _generate_table_constraint(constraint: sql.TableConstraint, /) -> str:
         cols = ", ".join(f'"{col}"' for col in constraint.columns)
         return f"{name}FOREIGN KEY ({cols}) " + _generate_foreign_key_clause(constraint)
     else:
-        expr = _generate_expr(constraint.expr)
+        expr = _generate_tokens(constraint.expr)
         return f"{name}CHECK ({expr})"
 
 
@@ -165,7 +181,7 @@ def _generate_qualified_name(qualified_name: sql.QualifiedName, /) -> str:
     return ".".join(f'"{name}"' for name in names)
 
 
-def _generate_expr(expr: Sequence[tok.Token], /) -> str:
+def _generate_tokens(expr: Iterable[tok.Token], /) -> str:
     return " ".join(_generate_tok(tk) for tk in expr)
 
 

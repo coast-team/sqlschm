@@ -253,15 +253,37 @@ class Table:
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
+class Index:
+    name: QualifiedName
+    table: str
+    indexed: tuple[Indexed, ...]
+    where: tuple[tok.Token, ...] | None
+    if_not_exists: bool = False
+    unique: bool = False
+
+
+SchemaItem = Index | Table
+
+
+@dataclass(frozen=True, kw_only=True, slots=True)
 class Schema:
-    tables: tuple[Table, ...]
+    items: tuple[SchemaItem, ...]
+
+    def tables(self, /) -> Iterable[Table]:
+        return (x for x in self.items if isinstance(x, Table))
+
+    def indexes(self, /) -> Iterable[Index]:
+        return (x for x in self.items if isinstance(x, Index))
+
+    def unique_indexes(self, /) -> Iterable[Index]:
+        return (x for x in self.indexes() if x.unique)
 
 
 Symbols = dict[str, Table]
 
 
 def symbols(schema: Schema, /) -> Symbols:
-    return {tbl.name[0]: tbl for tbl in schema.tables}
+    return {tbl.name[0]: tbl for tbl in schema.tables()}
 
 
 def referred_columns(fk: ForeignKey, symbols: Symbols, /) -> tuple[str, ...]:

@@ -1,0 +1,12 @@
+Schema(
+    items=(
+        Index(
+            name=("person_major_index",),
+            table="person",
+            indexed=(Indexed(column="fullname", collation=None, sorting=None),),
+            where=None,
+            if_not_exists=False,
+            unique=True,
+        ),
+    )
+)

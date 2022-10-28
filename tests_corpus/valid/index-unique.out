@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "person_major_index" ON "person"("fullname");

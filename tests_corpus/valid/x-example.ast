@@ -1,5 +1,5 @@
 Schema(
-    tables=(
+    items=(
         Table(
             name=("contact_groups",),
             columns=(
@@ -53,6 +53,14 @@ Schema(
             if_not_exists=False,
             or_replace=False,
             temporary=False,
+        ),
+        Index(
+            name=("contact_groups_group_index",),
+            table="contact_groups",
+            indexed=(Indexed(column="group_id", collation=None, sorting=None),),
+            where=None,
+            if_not_exists=False,
+            unique=True,
         ),
         Table(
             name=("contacts",),

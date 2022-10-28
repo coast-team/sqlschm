@@ -4,6 +4,26 @@ This project adheres to [Semantic Versioning][semver].
 
 ## Unreleased
 
+-   BREAKING CHANGES: support for indexes
+
+    sqlschm is now able to parse indexes such as:
+
+    ```sql
+    CREATE INDEX person_major_index ON person(age) WHERE major > 18;
+    ```
+
+    As a consequence, we renamed `tables` of `sql.Schema` by `items`.
+    You can update your code in the following way:
+
+    ```py
+    # from
+    schema.tables
+    # to
+    schema.tables()
+    ```
+
+    `schema.indexes()` returns all indexes.
+
 -   BREAKING CHANGES: remove sql.Alias
 
     ```py
