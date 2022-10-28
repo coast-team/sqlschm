@@ -137,7 +137,7 @@ class ForeignKey:
     is_table_constraint: bool = False
     columns: tuple[str, ...]
     foreign_table: Alias
-    referred_columns: tuple[str, ...] | None
+    referred_columns: tuple[str, ...] | None = None
     on_delete: OnUpdateDelete | None = None
     on_update: OnUpdateDelete | None = None
     match: Match | None = None
@@ -157,11 +157,31 @@ TableConstraint = Uniqueness | ForeignKey | Check
 ColumnConstraint = TableConstraint | Collation | Default | NotNull | Generated
 
 
+def uniqueness(constraints: Iterable[ColumnConstraint], /) -> Iterable[Uniqueness]:
+    """All uniqueness constraints, including the primary key"""
+    return (x for x in constraints if isinstance(x, Uniqueness))
+
+
+def primary_key(constraints: Iterable[ColumnConstraint], /) -> Uniqueness | None:
+    """First found primary key constraint"""
+    return next((x for x in uniqueness(constraints) if x.is_primary), None)
+
+
+def foreign_keys(constraints: Iterable[ColumnConstraint], /) -> Iterable[ForeignKey]:
+    """All foreign key constraints"""
+    return (x for x in constraints if isinstance(x, ForeignKey))
+
+
+def checks(constraints: Iterable[ColumnConstraint], /) -> Iterable[Check]:
+    """All foreign key constraints"""
+    return (x for x in constraints if isinstance(x, Check))
+
+
 @dataclass(frozen=True, kw_only=True, slots=True)
 class Column:
     name: str
-    type: Type
-    constraints: tuple[ColumnConstraint, ...]
+    type: Type = Type(name="")
+    constraints: tuple[ColumnConstraint, ...] = tuple()
 
     def collation(self, /) -> Collation | None:
         return next((x for x in self.constraints if isinstance(x, Collation)), None)
@@ -195,7 +215,7 @@ class TableOptions:
 class Table:
     name: QualifiedName
     columns: tuple[Column, ...]
-    constraints: tuple[TableConstraint, ...]
+    constraints: tuple[TableConstraint, ...] = tuple()
     options: TableOptions = TableOptions()
     if_not_exists: bool = False
     or_replace: bool = False
