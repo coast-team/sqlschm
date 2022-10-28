@@ -89,7 +89,7 @@ def _generate_table_constraint(constraint: sql.TableConstraint, /) -> str:
 
 
 def _generate_foreign_key_clause(constraint: sql.ForeignKey, /) -> str:
-    foreign_table = _generate_qualified_name(constraint.foreign_table.name)
+    foreign_table = _generate_qualified_name(constraint.foreign_table)
     referred_columns = (
         ("(" + ", ".join(f'"{col}"' for col in constraint.referred_columns) + ")")
         if constraint.referred_columns is not None

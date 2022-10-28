@@ -10,10 +10,8 @@ TABLE_B = sql.Table(
     columns=(sql.Column(name="b"),),
     constraints=(sql.Uniqueness(indexed=(sql.Indexed(column="b"),), is_primary=True),),
 )
-FK_A = sql.ForeignKey(
-    columns=("a",), foreign_table=sql.Alias(name=("A",)), referred_columns=("a",)
-)
-FK_B = sql.ForeignKey(columns=("b",), foreign_table=sql.Alias(name=("B",)))
+FK_A = sql.ForeignKey(columns=("a",), foreign_table=("A",), referred_columns=("a",))
+FK_B = sql.ForeignKey(columns=("b",), foreign_table=("B",))
 TABLE_C = sql.Table(
     name=("C",),
     columns=(sql.Column(name="a"), sql.Column(name="b")),
@@ -27,7 +25,7 @@ TABLE_C = sql.Table(
 )
 FK_C = sql.ForeignKey(
     columns=("x", "y"),
-    foreign_table=sql.Alias(name=("C",)),
+    foreign_table=("C",),
     referred_columns=("b", "a"),
 )
 TABLE_D = sql.Table(

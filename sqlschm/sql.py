@@ -70,11 +70,6 @@ QualifiedName = tuple[str, ...]
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
-class Alias:
-    name: QualifiedName
-
-
-@dataclass(frozen=True, kw_only=True, slots=True)
 class Type:
     name: str
     params: tuple[int, ...] = tuple()
@@ -137,7 +132,7 @@ class ForeignKey:
     name: str | None = None
     is_table_constraint: bool = False
     columns: tuple[str, ...]
-    foreign_table: Alias
+    foreign_table: QualifiedName
     referred_columns: tuple[str, ...] | None = None
     on_delete: OnUpdateDelete | None = None
     on_update: OnUpdateDelete | None = None
@@ -271,10 +266,10 @@ def symbols(schema: Schema, /) -> Symbols:
 
 def referred_columns(fk: ForeignKey, symbols: Symbols, /) -> tuple[str, ...]:
     """referred columns of `fk` or primary key of the foreign table"""
-    foreign_table = symbols.get(fk.foreign_table.name[0])
+    foreign_table = symbols.get(fk.foreign_table[0])
     assert (
         foreign_table is not None
-    ), f"Table '{fk.foreign_table.name[0]}' is not present in `symbols`"
+    ), f"Table '{fk.foreign_table[0]}' is not present in `symbols`"
     referred_columns = fk.referred_columns
     if referred_columns is None:
         f_pk = foreign_table.primary_key()
@@ -288,10 +283,10 @@ def resolve_foreign_key(
     fk: ForeignKey, col: str, symbols: Symbols
 ) -> Iterable[ForeignKey | str]:
     assert col in fk.columns
-    foreign_table = symbols.get(fk.foreign_table.name[0])
+    foreign_table = symbols.get(fk.foreign_table[0])
     assert (
         foreign_table is not None
-    ), f"Table '{fk.foreign_table.name[0]}' is not present in `symbols`"
+    ), f"Table '{fk.foreign_table[0]}' is not present in `symbols`"
     ref_cols = referred_columns(fk, symbols)
     assert len(fk.columns) == len(ref_cols)
     f_col = ref_cols[fk.columns.index(col)]

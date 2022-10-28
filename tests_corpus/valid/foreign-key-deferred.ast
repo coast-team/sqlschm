@@ -30,7 +30,7 @@ Schema(
                             name=None,
                             is_table_constraint=False,
                             columns=("friend",),
-                            foreign_table=Alias(name=("person",)),
+                            foreign_table=("person",),
                             referred_columns=("fullname",),
                             on_delete=None,
                             on_update=None,

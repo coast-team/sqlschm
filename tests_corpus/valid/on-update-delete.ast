@@ -28,7 +28,7 @@ Schema(
                             name=None,
                             is_table_constraint=False,
                             columns=("captain",),
-                            foreign_table=Alias(name=("person",)),
+                            foreign_table=("person",),
                             referred_columns=("fullname",),
                             on_delete=OnUpdateDelete.SET_NULL,
                             on_update=OnUpdateDelete.CASCADE,

@@ -284,7 +284,7 @@ def _parse_foreign_key_clause(
     is_table_constraint: bool = False,
 ) -> sql.ForeignKey:
     _expect(l, tok.REFERENCES)
-    foreign_table = sql.Alias(name=_parse_qualified_name(l))
+    foreign_table = _parse_qualified_name(l)
     referred_columns: tuple[str, ...] | None = None
     on_delete: sql.OnUpdateDelete | None = None
     on_update: sql.OnUpdateDelete | None = None

@@ -4,6 +4,16 @@ This project adheres to [Semantic Versioning][semver].
 
 ## Unreleased
 
+-   BREAKING CHANGES: remove sql.Alias
+
+    ```py
+    # from
+    foreign_key.foreign_table.name
+
+    # to
+    foreign_key.foreign_table
+    ```
+
 -   Add helper functions
 
     `sql.referred_columns` allows computing referred columns by a foreign key.
