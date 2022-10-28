@@ -2,6 +2,20 @@
 
 This project adheres to [Semantic Versioning][semver].
 
+## Unreleased
+
+-   Add helper functions
+
+    `sql.referred_columns` allows computing referred columns by a foreign key.
+    If referred columns are unspecified, then the function returns
+    the columns of the primary key of the foreign table.
+
+    `sql.test_resolve_foreign_key` traverse the graph of references
+    until a column that is not a foreign key is found.
+    Traversed foreign keys are yield.
+    Note that this may produce an endless sequence of foreign keys
+    in the case of cyclic foreign keys.
+
 ## 0.7.0 (2022-10-25)
 
 -   BREAKING CHANGES: use tuples instead of Sequence abstraction

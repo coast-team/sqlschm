@@ -128,6 +128,7 @@ class Uniqueness:
     on_conflict: OnConflict | None = None
 
     def columns(self, /) -> Iterable[str]:
+        """Names of indexed columns"""
         return (x.column for x in self.indexed)
 
 
@@ -221,7 +222,17 @@ class Table:
     or_replace: bool = False
     temporary: bool = False
 
+    def column(self, name: str, /) -> Column | None:
+        return next(x for x in self.columns if x.name == name)
+
+    def generated_columns(self, /) -> Iterable[Column]:
+        return (x for x in self.columns if x.generated() is not None)
+
+    def non_generated_columns(self, /) -> Iterable[Column]:
+        return (x for x in self.columns if x.generated() is None)
+
     def all_constraints(self, /) -> Iterable[TableConstraint]:
+        """Constraints declared on the table and on the columns"""
         return itertools.chain(
             itertools.chain.from_iterable(
                 col.table_constraints() for col in self.columns
@@ -231,26 +242,19 @@ class Table:
 
     def primary_key(self, /) -> Uniqueness | None:
         """First found primary key constraint"""
-        return next(
-            (
-                x
-                for x in self.all_constraints()
-                if isinstance(x, Uniqueness) and x.is_primary
-            ),
-            None,
-        )
+        return primary_key(self.all_constraints())
 
     def uniqueness(self, /) -> Iterable[Uniqueness]:
         """All uniqueness constraints, including the primary key"""
-        return (x for x in self.all_constraints() if isinstance(x, Uniqueness))
+        return uniqueness(self.all_constraints())
 
     def foreign_keys(self, /) -> Iterable[ForeignKey]:
         """All foreign key constraints"""
-        return (x for x in self.all_constraints() if isinstance(x, ForeignKey))
+        return foreign_keys(self.all_constraints())
 
     def checks(self, /) -> Iterable[Check]:
         """All foreign key constraints"""
-        return (x for x in self.all_constraints() if isinstance(x, Check))
+        return checks(self.all_constraints())
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
@@ -263,3 +267,37 @@ Symbols = dict[str, Table]
 
 def symbols(schema: Schema, /) -> Symbols:
     return {tbl.name[0]: tbl for tbl in schema.tables}
+
+
+def referred_columns(fk: ForeignKey, symbols: Symbols, /) -> tuple[str, ...]:
+    """referred columns of `fk` or primary key of the foreign table"""
+    foreign_table = symbols.get(fk.foreign_table.name[0])
+    assert (
+        foreign_table is not None
+    ), f"Table '{fk.foreign_table.name[0]}' is not present in `symbols`"
+    referred_columns = fk.referred_columns
+    if referred_columns is None:
+        f_pk = foreign_table.primary_key()
+        assert f_pk is not None
+        return tuple(f_pk.columns())
+    else:
+        return referred_columns
+
+
+def resolve_foreign_key(
+    fk: ForeignKey, col: str, symbols: Symbols
+) -> Iterable[ForeignKey | str]:
+    assert col in fk.columns
+    foreign_table = symbols.get(fk.foreign_table.name[0])
+    assert (
+        foreign_table is not None
+    ), f"Table '{fk.foreign_table.name[0]}' is not present in `symbols`"
+    ref_cols = referred_columns(fk, symbols)
+    assert len(fk.columns) == len(ref_cols)
+    f_col = ref_cols[fk.columns.index(col)]
+    for f_fk in foreign_table.foreign_keys():
+        if f_col in f_fk.columns:
+            yield f_fk
+            yield from resolve_foreign_key(f_fk, f_col, symbols)
+            return
+    yield f_col
