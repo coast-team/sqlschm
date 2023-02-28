@@ -14,11 +14,10 @@ packages = [
 python = "^3.10"
 
 [tool.poetry.dev-dependencies]
-black = "^22.1.0"
+black = "^23.1.0"
 pylint = "^2.16.2"
-pyright = "^1.1.227"
-pytest = "^7.0.1"
-mypy = "^0.950"
+pytest = "^7.2.1"
+mypy = "^1.0"
 
 [tool.poetry.scripts]
 corpus = "scripts:main"
