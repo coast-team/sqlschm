@@ -1,7 +1,9 @@
-This project uses [poetry][python-poetry] to handle production and
-development dependencies.
+# Contributing
 
-It uses pytest for unit-testing and black for code formatting.
+## Getting started
+
+This project uses [poetry](https://python-poetry.org/) to handle production and
+development dependencies.
 
 To install all dependencies, you simply need to run:
 
@@ -33,10 +35,29 @@ To lint the project:
 poetry run pylint sqlschm tests
 ```
 
-To generate the corpus ast:
+The tests are based on snapshots that are stored in [tests_corpus](tests_corpus).
+To generate the corpus run:
 
 ```sh
 PYTHONPATH="$PWD" python scripts/generate_corpus.py
 ```
 
-[poetry-python]: https://python-poetry.org
+## Commit messages
+
+The project adheres to the [conventional commit specification](https://www.conventionalcommits.org/).
+
+The following commit prefixes are supported:
+
+- `feat:`, a new feature
+- `fix:`, a bugfix
+- `docs:`, a documentation update
+- `test:`, a test update
+- `chore:`, project housekeeping
+- `perf:`, project performance
+- `refactor:`, refactor of the code without change in functionality
+
+See the _git log_ for well-formed messages.
+
+## Changelog
+
+The project [keeps a changelog](https://keepachangelog.com/en/1.0.0/) that document every change that is visible to the user.
