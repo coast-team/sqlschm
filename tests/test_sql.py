@@ -1,3 +1,6 @@
+# Copyright (c) 2022 Victorien Elvinger
+# Licensed under the MIT License (https://mit-license.org/)
+
 from sqlschm import sql
 
 TABLE_A = sql.Table(
