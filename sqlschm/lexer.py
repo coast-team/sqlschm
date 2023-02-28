@@ -1,6 +1,10 @@
 # Copyright (c) 2022 Victorien Elvinger
 # Licensed under the MIT License (https://mit-license.org/)
 
+"""
+SQL lexer / tokenizer.
+"""
+
 from dataclasses import dataclass
 from typing import Iterator, Iterable, Generic, TypeVar
 from sqlschm import tok

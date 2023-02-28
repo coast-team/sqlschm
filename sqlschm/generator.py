@@ -1,6 +1,10 @@
 # Copyright (c) 2022 Victorien Elvinger
 # Licensed under the MIT License (https://mit-license.org/)
 
+"""
+SQL schema printer.
+"""
+
 from typing import Iterable
 import textwrap
 from sqlschm import sql, tok

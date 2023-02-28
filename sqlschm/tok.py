@@ -1,17 +1,33 @@
 # Copyright (c) 2022 Victorien Elvinger
 # Licensed under the MIT License (https://mit-license.org/)
 
+"""
+Representation of SQL tokens.
+"""
+
 from dataclasses import dataclass
 from enum import Flag, unique, auto
 
 
 class _ReprFlag(Flag):
+    """Enum Flag that uses its name as representation."""
+
     def __repr__(self) -> str:
         return f"{type(self).__name__}.{self.name}"
 
 
 @unique
 class TokenKind(_ReprFlag):
+    """A token kind is a flag value that allows to categorize a token in several basic kind.
+
+    For example, in SQL a double-quoted value such as "s" is both a delimited identifier and a non-standard string.
+    Thus, the following expression resolve to True:
+
+    TokenKind.STD_DELIMITED_ID & TokenKind.STD_DELIMITED_ID
+    TokenKind.STD_DELIMITED_ID & TokenKind.DELIMITED_ID
+    TokenKind.STD_DELIMITED_ID & TokenKind.STR
+    """
+
     KEYWORD = auto()
 
     RAW_ID = auto()  # id
@@ -64,10 +80,12 @@ class Token:
 
 
 def is_not_trivia(tk: Token, /) -> bool:
+    """Is `tk` kind a non-trivia kind?"""
     return not bool(tk.kind & TokenKind.TRIVIA)
 
 
 def like(a: Token, b: Token, /) -> bool:
+    """Have `a` and `b` the same val and a compatible kind?"""
     return bool(a.kind & b.kind) and a.val == b.val
 
 
@@ -272,6 +290,8 @@ WINDOW: Token = Token(TokenKind.KEYWORD, "WINDOW")
 WITH: Token = Token(TokenKind.KEYWORD, "WITH")
 WITHOUT: Token = Token(TokenKind.KEYWORD, "WITHOUT")
 
+# Use this dictionary to reuse tokens.
+# This is possible because Token are frozen.
 INTERNED: dict[str, Token] = {
     # All operators with two character corresponds to the concatenation of
     # two single-char operators, except operators starting with !

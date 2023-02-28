@@ -1,6 +1,10 @@
 # Copyright (c) 2022 Victorien Elvinger
 # Licensed under the MIT License (https://mit-license.org/)
 
+"""
+Generate the snapshots for testing the parser and the printer.
+"""
+
 from sqlschm.parser import parse_schema
 from sqlschm.generator import generate_schema
 from sqlschm.sql import Dialect

@@ -1,6 +1,10 @@
 # Copyright (c) 2022 Victorien Elvinger
 # Licensed under the MIT License (https://mit-license.org/)
 
+"""
+Representation of a SQL schema (AST).
+"""
+
 from dataclasses import dataclass
 from enum import Enum, auto
 import itertools
@@ -9,12 +13,15 @@ from sqlschm import tok
 
 
 class _ReprEnum(Enum):
+    """Enum that uses its name as representation."""
+
     def __repr__(self) -> str:
         return f"{type(self).__name__}.{self.name}"
 
 
-# SQLite specific
 class Dialect(_ReprEnum):
+    """SQL dialects"""
+
     SQLITE = auto()
 
 
@@ -286,6 +293,7 @@ Symbols = dict[str, Table]
 
 
 def symbols(schema: Schema, /) -> Symbols:
+    """Symbol table from `schema`."""
     return {tbl.name[0]: tbl for tbl in schema.tables()}
 
 
