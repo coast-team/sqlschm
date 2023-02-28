@@ -14,13 +14,13 @@ _EOF_TOKEN: tok.Token = tok.Token(tok.TokenKind.UNKNOWN, "")
 
 def parse_schema(src: Iterable[str], /) -> sql.Schema:
     non_trivia_tokens = filter(tok.is_not_trivia, lexer.tokens(src))
-    l = lexer.ItemCursor(non_trivia_tokens, _EOF_TOKEN)
+    lex = lexer.ItemCursor(non_trivia_tokens, _EOF_TOKEN)
     tables: list[sql.SchemaItem] = []
-    while l.item is not _EOF_TOKEN:
-        if l.item is tok.SEMICOLON:
-            l.forth()
+    while lex.item is not _EOF_TOKEN:
+        if lex.item is tok.SEMICOLON:
+            lex.forth()
             continue
-        tables.append(_parse_create_statement(l))
+        tables.append(_parse_create_statement(lex))
     return sql.Schema(items=tuple(tables))
 
 
@@ -176,17 +176,16 @@ def _parse_table_constraint(l: Lex, /) -> sql.TableConstraint:
             is_primary=is_primary,
             on_conflict=_parse_on_conflict(l),
         )
-    elif l.item is tok.FOREIGN:
+    if l.item is tok.FOREIGN:
         l.forth()
         _expect(l, tok.KEY)
         columns = _parse_parens_names(l)
         return _parse_foreign_key_clause(l, columns, name, is_table_constraint=True)
-    elif l.item is tok.CHECK:
+    if l.item is tok.CHECK:
         l.forth()
         expr = tokens_in_parens(l)
         return sql.Check(name=name, is_table_constraint=True, expr=expr)
-    else:
-        raise ParserError(f"'{l.item.val}' cannot start a table constraint")
+    raise ParserError(f"'{l.item.val}' cannot start a table constraint")
 
 
 def _parse_col_constraint(l: Lex, col_name: str, /) -> sql.ColumnConstraint:
@@ -212,23 +211,23 @@ def _parse_col_constraint(l: Lex, col_name: str, /) -> sql.ColumnConstraint:
             autoincrement=autoincrement,
             on_conflict=on_conflict,
         )
-    elif l.item is tok.CHECK:
+    if l.item is tok.CHECK:
         l.forth()
         expr = tokens_in_parens(l)
         return sql.Check(name=name, expr=expr)
-    elif l.item is tok.REFERENCES:
+    if l.item is tok.REFERENCES:
         return _parse_foreign_key_clause(l, (col_name,), name)
-    elif l.item is tok.NOT:
+    if l.item is tok.NOT:
         l.forth()
         _expect(l, tok.NULL)
         return sql.NotNull(name=name, on_conflict=_parse_on_conflict(l))
-    elif l.item is tok.DEFAULT:
+    if l.item is tok.DEFAULT:
         l.forth()
         return sql.Default(name=name, expr=_parse_expr(l))
-    elif l.item is tok.COLLATE:
+    if l.item is tok.COLLATE:
         l.forth()
         return sql.Collation(name=name, value=_parse_name(l))
-    elif l.item is tok.GENERATED or l.item is tok.AS:
+    if l.item is tok.GENERATED or l.item is tok.AS:
         if l.item is tok.GENERATED and l.next_item is tok.ALWAYS:
             l.forth()
             l.forth()
@@ -246,8 +245,7 @@ def _parse_col_constraint(l: Lex, col_name: str, /) -> sql.ColumnConstraint:
             kind = sql.GeneratedKind[tok_val]
             l.forth()
         return sql.Generated(name=name, expr=expr, kind=kind)
-    else:
-        raise ParserError(f"'{l.item.val}' cannot start a column constraint")
+    raise ParserError(f"'{l.item.val}' cannot start a column constraint")
 
 
 def _parse_indexed_names(l: Lex, /) -> tuple[sql.Indexed, ...]:
@@ -274,7 +272,7 @@ def _parse_optional_sorting(l: Lex, /) -> sql.Sorting | None:
     if l.item is tok.ASC:
         l.forth()
         return sql.Sorting.ASC
-    elif l.item is tok.DESC:
+    if l.item is tok.DESC:
         l.forth()
         return sql.Sorting.DESC
     return None
@@ -386,11 +384,10 @@ def _parse_constraint_enforcement_time(
         if l.item is tok.DEFERRED:
             l.forth()
             return sql.ConstraintEnforcementTime.DEFERRED
-        elif l.item is tok.IMMEDIATE:
+        if l.item is tok.IMMEDIATE:
             l.forth()
             return sql.ConstraintEnforcementTime.IMMEDIATE
-        else:
-            raise ParserError(f"'{l.item.val}' is not a valid enforcement time")
+        raise ParserError(f"'{l.item.val}' is not a valid enforcement time")
     return None
 
 
@@ -398,23 +395,22 @@ def _parse_on_updatedelete_action(l: Lex, /) -> sql.OnUpdateDelete:
     if l.item is tok.CASCADE:
         l.forth()
         return sql.OnUpdateDelete.CASCADE
-    elif l.item is tok.NO and l.next_item is tok.ACTION:
+    if l.item is tok.NO and l.next_item is tok.ACTION:
         l.forth()
         l.forth()
         return sql.OnUpdateDelete.NO_ACTION
-    elif l.item is tok.SET and l.next_item is tok.NULL:
+    if l.item is tok.SET and l.next_item is tok.NULL:
         l.forth()
         l.forth()
         return sql.OnUpdateDelete.SET_NULL
-    elif l.item is tok.SET and l.next_item is tok.DEFAULT:
+    if l.item is tok.SET and l.next_item is tok.DEFAULT:
         l.forth()
         l.forth()
         return sql.OnUpdateDelete.SET_DEFAULT
-    elif l.item is tok.RESTRICT:
+    if l.item is tok.RESTRICT:
         l.forth()
         return sql.OnUpdateDelete.RESTRICT
-    else:
-        raise ParserError("'Invalid ON DELETE/UPDATE action")
+    raise ParserError("'Invalid ON DELETE/UPDATE action")
 
 
 def _parse_on_conflict(l: Lex, /) -> sql.OnConflict | None:
@@ -426,8 +422,7 @@ def _parse_on_conflict(l: Lex, /) -> sql.OnConflict | None:
         result = sql.OnConflict[l.item.val]
         l.forth()
         return result
-    else:
-        return None
+    return None
 
 
 def _parse_int(l: Lex, /) -> int:
@@ -449,7 +444,7 @@ def _parse_qualified_name(l: Lex, /) -> sql.QualifiedName:
 
 def _parse_name(l: Lex, /) -> str:
     if not bool(l.item.kind & tok.TokenKind.ID):
-        raise ParserError(f"an identifier is expected.")
+        raise ParserError("an identifier is expected.")
     result = l.item.val
     l.forth()
     return result

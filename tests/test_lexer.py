@@ -23,9 +23,9 @@ def test_spaces() -> None:
 
 
 def test_int() -> None:
-    for x in ["42", "042"]:
-        tks = list(lexer.tokens(x))
-        assert tks == [Token(TokenKind.INT, x)]
+    for item in ["42", "042"]:
+        tks = list(lexer.tokens(item))
+        assert tks == [Token(TokenKind.INT, item)]
 
 
 def test_hex() -> None:
@@ -34,9 +34,9 @@ def test_hex() -> None:
 
 
 def test_float() -> None:
-    for x in ["1.0", "0.", ".0", "0.e5", "0.e-5", "0.e+5", ".0e5", "1e-3"]:
-        tks = list(lexer.tokens(x))
-        assert tks == [Token(TokenKind.FLOAT, x)]
+    for item in ["1.0", "0.", ".0", "0.e5", "0.e-5", "0.e+5", ".0e5", "1e-3"]:
+        tks = list(lexer.tokens(item))
+        assert tks == [Token(TokenKind.FLOAT, item)]
 
 
 def test_binary() -> None:
@@ -66,9 +66,9 @@ def test_enclosed_id() -> None:
 
 
 def test_interned() -> None:
-    for x in tok.INTERNED:
-        tks = list(lexer.tokens(x))
-        assert tks == [tok.INTERNED[x]]
+    for val, token in tok.INTERNED.items():
+        tks = list(lexer.tokens(val))
+        assert tks == [token]
 
 
 def test_str() -> None:

@@ -1,4 +1,4 @@
-from sqlschm import sql, parser
+from sqlschm import sql
 
 TABLE_A = sql.Table(
     name=("A",),

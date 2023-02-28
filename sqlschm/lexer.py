@@ -26,47 +26,53 @@ class ItemCursor(Generic[T]):
 
 
 def tokens(src: Iterable[str], /) -> Iterable[tok.Token]:
-    cs = ItemCursor(src, None)
-    while cs.item is not None:
-        assert len(cs.item) == 1
-        if cs.item.isspace():
-            yield tok.INTERNED[cs.item]
-            cs.forth()
-        elif cs.item.isdecimal() or (
-            cs.item == "." and cs.next_item is not None and cs.next_item.isdecimal()
+    cursor = ItemCursor(src, None)
+    while cursor.item is not None:
+        assert len(cursor.item) == 1
+        if cursor.item.isspace():
+            yield tok.INTERNED[cursor.item]
+            cursor.forth()
+        elif cursor.item.isdecimal() or (
+            cursor.item == "."
+            and cursor.next_item is not None
+            and cursor.next_item.isdecimal()
         ):
-            yield _numeric_token(cs)
-        elif cs.item.isidentifier():
-            id = _identifier(cs)
-            id_upper = id.upper()
-            if id_upper == "B" and cs.item in ["'", '"']:
-                yield _bin_token(cs)
-            elif id_upper == "X" and cs.item in ["'", '"']:
-                yield _blob_token(cs)
+            yield _numeric_token(cursor)
+        elif cursor.item.isidentifier():
+            ident = _identifier(cursor)
+            id_upper = ident.upper()
+            if id_upper == "B" and cursor.item in ["'", '"']:
+                yield _bin_token(cursor)
+            elif id_upper == "X" and cursor.item in ["'", '"']:
+                yield _blob_token(cursor)
             elif id_upper in tok.INTERNED:
                 yield tok.INTERNED[id_upper]
             else:
-                yield tok.Token(tok.TokenKind.RAW_ID, id)
-        elif cs.item in "'\"":
-            yield _str_token(cs)
-        elif cs.item in "`[":
-            yield _enclosed_id_token(cs)
-        elif cs.item in tok.INTERNED:
-            concat = cs.item + cs.next_item if cs.next_item is not None else cs.item
-            if concat == "--" or concat == "# ":
-                yield _single_line_comment_token(cs)
+                yield tok.Token(tok.TokenKind.RAW_ID, ident)
+        elif cursor.item in "'\"":
+            yield _str_token(cursor)
+        elif cursor.item in "`[":
+            yield _enclosed_id_token(cursor)
+        elif cursor.item in tok.INTERNED:
+            concat = (
+                cursor.item + cursor.next_item
+                if cursor.next_item is not None
+                else cursor.item
+            )
+            if concat in ("--", "# "):
+                yield _single_line_comment_token(cursor)
             elif concat == "/*":
-                yield _multi_line_comment_token(cs)
+                yield _multi_line_comment_token(cursor)
             else:
                 if concat in tok.INTERNED:
                     yield tok.INTERNED[concat]
-                    cs.forth()
+                    cursor.forth()
                 else:
-                    yield tok.INTERNED[cs.item]
-                cs.forth()
+                    yield tok.INTERNED[cursor.item]
+                cursor.forth()
         else:
-            yield tok.Token(tok.TokenKind.UNKNOWN, cs.item)
-            cs.forth()
+            yield tok.Token(tok.TokenKind.UNKNOWN, cursor.item)
+            cursor.forth()
 
 
 def _single_line_comment_token(cs: ItemCursor[str | None], /) -> tok.Token:
@@ -105,22 +111,22 @@ def _blob_token(cs: ItemCursor[str | None], /) -> tok.Token:
     assert cs.item in ["'", '"']
     delim = cs.item
     cs.forth()  # consume ' or "
-    n = _hex_literal(cs)
+    val = _hex_literal(cs)
     if cs.item != delim:
-        return tok.Token(tok.TokenKind.UNKNOWN, f"{delim}{n}")
+        return tok.Token(tok.TokenKind.UNKNOWN, f"{delim}{val}")
     cs.forth()  # consume ' or "
-    return tok.Token(tok.TokenKind.BLOB, n)
+    return tok.Token(tok.TokenKind.BLOB, val)
 
 
 def _bin_token(cs: ItemCursor[str | None], /) -> tok.Token:
     assert cs.item in ["'", '"']
     delim = cs.item
     cs.forth()  # consume ' or "
-    n = _bin_literal(cs)
+    val = _bin_literal(cs)
     if cs.item != delim:
-        return tok.Token(tok.TokenKind.UNKNOWN, f"{delim}{n}")
+        return tok.Token(tok.TokenKind.UNKNOWN, f"{delim}{val}")
     cs.forth()  # consume ' or "
-    return tok.Token(tok.TokenKind.BINARY, n)
+    return tok.Token(tok.TokenKind.BINARY, val)
 
 
 def _numeric_token(cs: ItemCursor[str | None], /) -> tok.Token:
@@ -131,13 +137,12 @@ def _numeric_token(cs: ItemCursor[str | None], /) -> tok.Token:
         cs.forth()
         val = first_part + "." + _fractional_literal(cs)
         return tok.Token(tok.TokenKind.FLOAT, val)
-    elif first_part == "0" and cs.item in ["x", "X"]:
-        x = cs.item
+    if first_part == "0" and cs.item in ["x", "X"]:
+        item = cs.item
         cs.forth()
         if cs.item in _HEX_DIGITS:
             return tok.Token(tok.TokenKind.HEX, _hex_literal(cs))
-        else:
-            return tok.Token(tok.TokenKind.UNKNOWN, f"0{x}")
+        return tok.Token(tok.TokenKind.UNKNOWN, f"0{item}")
     return tok.Token(tok.TokenKind.INT, first_part)
 
 
@@ -145,29 +150,29 @@ def _str_token(cs: ItemCursor[str | None], /) -> tok.Token:
     assert cs.item is not None
     delim = cs.item  # " or '
     cs.forth()  # consume delim
-    s = ""
+    val = ""
     while cs.item is not None and (cs.item != delim or cs.next_item == delim):
         # escaped delim?
         if cs.item == delim:
             assert cs.next_item == delim
             cs.forth()
-        s += cs.item
+        val += cs.item
         cs.forth()
     if cs.item is None:
-        return tok.Token(tok.TokenKind.UNKNOWN, f"{delim}{s}")
+        return tok.Token(tok.TokenKind.UNKNOWN, f"{delim}{val}")
     cs.forth()  # consume delim
     kind = tok.TokenKind.STD_STR if delim == "'" else tok.TokenKind.STD_DELIMITED_ID
-    return tok.Token(kind, s)
+    return tok.Token(kind, val)
 
 
 def _enclosed_id_token(cs: ItemCursor[str | None], /) -> tok.Token:
     delim = cs.item
     cs.forth()
-    s = _identifier(cs)
+    val = _identifier(cs)
     if cs.item != delim:
         pass
     cs.forth()
-    return tok.Token(tok.TokenKind.NON_STD_DELIMITED_ID, s)
+    return tok.Token(tok.TokenKind.NON_STD_DELIMITED_ID, val)
 
 
 def _identifier(cs: ItemCursor[str | None], /) -> str:

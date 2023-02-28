@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from enum import Enum, auto
-from sqlschm import tok
-from typing import Iterable
 import itertools
+from typing import Iterable
+from sqlschm import tok
 
 
 class _ReprEnum(Enum):
@@ -286,35 +286,34 @@ def symbols(schema: Schema, /) -> Symbols:
     return {tbl.name[0]: tbl for tbl in schema.tables()}
 
 
-def referred_columns(fk: ForeignKey, symbols: Symbols, /) -> tuple[str, ...]:
+def referred_columns(fk: ForeignKey, syms: Symbols, /) -> tuple[str, ...]:
     """referred columns of `fk` or primary key of the foreign table"""
-    foreign_table = symbols.get(fk.foreign_table[0])
+    foreign_table = syms.get(fk.foreign_table[0])
     assert (
         foreign_table is not None
     ), f"Table '{fk.foreign_table[0]}' is not present in `symbols`"
-    referred_columns = fk.referred_columns
-    if referred_columns is None:
+    result = fk.referred_columns
+    if result is None:
         f_pk = foreign_table.primary_key()
         assert f_pk is not None
         return tuple(f_pk.columns())
-    else:
-        return referred_columns
+    return result
 
 
 def resolve_foreign_key(
-    fk: ForeignKey, col: str, symbols: Symbols
+    foreign_key: ForeignKey, col: str, syms: Symbols
 ) -> Iterable[ForeignKey | str]:
-    assert col in fk.columns
-    foreign_table = symbols.get(fk.foreign_table[0])
+    assert col in foreign_key.columns
+    foreign_table = syms.get(foreign_key.foreign_table[0])
     assert (
         foreign_table is not None
-    ), f"Table '{fk.foreign_table[0]}' is not present in `symbols`"
-    ref_cols = referred_columns(fk, symbols)
-    assert len(fk.columns) == len(ref_cols)
-    f_col = ref_cols[fk.columns.index(col)]
+    ), f"Table '{foreign_key.foreign_table[0]}' is not present in `symbols`"
+    ref_cols = referred_columns(foreign_key, syms)
+    assert len(foreign_key.columns) == len(ref_cols)
+    f_col = ref_cols[foreign_key.columns.index(col)]
     for f_fk in foreign_table.foreign_keys():
         if f_col in f_fk.columns:
             yield f_fk
-            yield from resolve_foreign_key(f_fk, f_col, symbols)
+            yield from resolve_foreign_key(f_fk, f_col, syms)
             return
     yield f_col

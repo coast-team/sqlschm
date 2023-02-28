@@ -1,7 +1,6 @@
-from sqlschm.parser import parse_schema
-import black
-from black import mode
 import os
+import black
+from sqlschm.parser import parse_schema
 
 CORPUS = "tests_corpus/valid/"
 
@@ -12,9 +11,11 @@ def test_valid_schema() -> None:
     for schm_name in files:
         if schm_name.endswith(".sql"):
             out_name = CORPUS + schm_name[:-4] + ".ast"
-            with open(CORPUS + schm_name) as schm, open(out_name) as out:
+            with open(CORPUS + schm_name, encoding="utf-8") as schm, open(
+                out_name, encoding="utf-8"
+            ) as out:
                 schm_content = schm.read()
                 out_content = out.read()
             ast = parse_schema(schm_content)
-            computed_content = black.format_str(repr(ast), mode=mode.Mode())
+            computed_content = black.format_str(repr(ast), mode=black.mode.Mode())
             assert computed_content == out_content

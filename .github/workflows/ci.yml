@@ -16,3 +16,5 @@ jobs:
             - run: poetry install
             - run: poetry run mypy sqlschm
             - run: poetry run pytest
+            - run: poetry run pylint sqlschm tests
+            - run: poetry run black --check .

@@ -9,12 +9,6 @@ To install all dependencies, you simply need to run:
 poetry install
 ```
 
-To run the formatter:
-
-```sh
-poetry run black sqlschm/ tests/
-```
-
 To run tests:
 
 ```sh
@@ -24,7 +18,19 @@ poetry run pytest
 To run the type-checker:
 
 ```sh
-poetry run pyright
+poetry run mypy
+```
+
+To run the formatter:
+
+```sh
+poetry run black .
+```
+
+To lint the project:
+
+```sh
+poetry run pylint sqlschm tests
 ```
 
 To generate the corpus ast:
